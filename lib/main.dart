@@ -494,7 +494,7 @@ class WePeiYangAppState extends State<WePeiYangApp>
 
   Widget _builder(BuildContext context, Widget? child) {
     // 点击空白区域取消TextField焦点
-    return GestureDetector(
+    final body = GestureDetector(
       child: child,
       onTapUp: (_) {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -503,6 +503,40 @@ class WePeiYangAppState extends State<WePeiYangApp>
           FocusManager.instance.primaryFocus?.unfocus();
         }
       },
+    );
+
+    // 平板等大屏适配：把应用装进居中的手机比例列（宽度上限 480dp），并让
+    // ScreenUtil 按该列尺寸重算缩放。否则横屏平板上 .w 会按整块屏宽放大 3 倍
+    // 以上（designSize 390 宽 vs 平板 1280dp 宽），弹窗、按钮全面溢出。
+    // 放在 MaterialApp.builder 里可保证每帧晚于 ScreenUtilInit 初始化执行。
+    final mq = MediaQuery.of(context);
+    if (mq.size.shortestSide < 600) return body;
+
+    final width = mq.size.width < 480 ? mq.size.width : 480.0;
+    final height = mq.size.height < width * 844 / 390
+        ? mq.size.height
+        : width * 844 / 390;
+    final size = Size(width, height);
+
+    ScreenUtil.configure(
+      data: mq.copyWith(size: size),
+      designSize: const Size(390, 844),
+      minTextAdapt: true,
+      splitScreenMode: false,
+    );
+
+    return ColoredBox(
+      color: WpyTheme.of(context).get(WpyColorKey.primaryBackgroundColor),
+      child: Center(
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: MediaQuery(
+            data: mq.copyWith(size: size),
+            child: body,
+          ),
+        ),
+      ),
     );
   }
 }
