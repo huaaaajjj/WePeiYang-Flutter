@@ -5,7 +5,6 @@ import 'package:we_pei_yang_flutter/commons/token/lake_token_manager.dart';
 import 'package:we_pei_yang_flutter/commons/util/router_manager.dart';
 import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/commons/util/toast_provider.dart';
-import 'package:we_pei_yang_flutter/main.dart';
 
 import '../../../commons/themes/wpy_theme.dart';
 import '../../../commons/widgets/w_button.dart';
@@ -59,7 +58,6 @@ class _AddInfoWidgetState extends State<AddInfoWidget> {
   Widget build(BuildContext context) {
     final TextStyle _hintStyle =
         TextUtil.base.regular.sp(13).oldHintDarker(context);
-    double width = WePeiYangApp.screenWidth - 80;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -139,10 +137,10 @@ class _AddInfoWidgetState extends State<AddInfoWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Row(
               children: [
-                ConstrainedBox(
+                Expanded(
+                    child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxHeight: 50,
-                    maxWidth: width / 2 + 20,
                   ),
                   child: TextField(
                     decoration: InputDecoration(
@@ -160,10 +158,11 @@ class _AddInfoWidgetState extends State<AddInfoWidget> {
                     onChanged: (input) => setState(() => code = input),
                   ),
                 ),
+                ),
                 SizedBox(width: 20),
                 SizedBox(
                     height: 55,
-                    width: width / 2 - 20,
+                    width: 135,
                     child: isPress
                         ? StreamBuilder<int>(
                             stream: Stream.periodic(

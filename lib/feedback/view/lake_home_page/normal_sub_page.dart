@@ -655,14 +655,16 @@ class BannerSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Colors.black12,
+        // 平板大屏：用实际可用宽度算高度（旧 0.32*screenWidth 在宽屏上过大）
+        child: AspectRatio(
+          aspectRatio: 1 / 0.32,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+              color: Colors.black12,
+            ),
+            margin: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 0),
           ),
-          margin: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 0),
-          height: 0.32 * WePeiYangApp.screenWidth,
-          width: double.infinity,
         ),
         period: Duration(milliseconds: 1000),
         baseColor: WpyTheme.of(context).get(WpyColorKey.infoTextColor),
@@ -683,7 +685,8 @@ class AdCardWidget extends StatelessWidget {
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
         child: _len > 0
-            ? ActivityCard(1.sw - 40.w)
+            // 平板大屏：卡片宽度按帖子栏上限折算（手机端数值不变）
+            ? ActivityCard((1.sw - 40.w).clamp(0.0, 640.w - 40.w).toDouble())
             : Shimmer.fromColors(
                 baseColor: WpyTheme.of(context).get(WpyColorKey.infoTextColor),
                 highlightColor: WpyTheme.of(context)
@@ -693,8 +696,9 @@ class AdCardWidget extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(8.r)),
                     color: Colors.black12,
                   ),
-                  width: 1.sw - 40.w,
-                  height: (1.sw - 40.w) * 0.32,
+                  width: (1.sw - 40.w).clamp(0.0, 640.w - 40.w).toDouble(),
+                  height:
+                      (1.sw - 40.w).clamp(0.0, 640.w - 40.w).toDouble() * 0.32,
                 ),
               ),
       ),
@@ -828,7 +832,10 @@ class AnnouncementBannerWidget extends StatelessWidget {
                         ),
                         SizedBox(width: 6),
                         SizedBox(
-                            width: WePeiYangApp.screenWidth - 83,
+                            // 平板大屏：标题宽度按帖子栏上限折算（手机端数值不变）
+                            width: (WePeiYangApp.screenWidth - 83)
+                                .clamp(0.0, 640.w - 83)
+                                .toDouble(),
                             child: context
                                         .read<NoticeProvider>()
                                         .noticeList

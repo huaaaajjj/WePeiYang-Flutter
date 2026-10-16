@@ -39,7 +39,7 @@ class CourseDialog extends Dialog {
             .sp(9)
             .space(letterSpacing: 0.5);
 
-  final _width = 1.sw - 120.w;
+  final _width = (1.sw - 120.w).clamp(0.0, 460.0).toDouble();
 
   final TextStyle _nameStyle;
 

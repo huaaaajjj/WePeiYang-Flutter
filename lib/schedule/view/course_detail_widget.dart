@@ -22,7 +22,7 @@ const double horStep = 6;
 
 int get _dayNumber => CommonPreferences.dayNumber.value;
 
-double get _width => 1.sw - 15 * 2.w;
+double get _width => min(1.sw - 15 * 2.w, 560.0);
 
 double get _cardWidth => (_width - (_dayNumber - 1) * horStep) / _dayNumber;
 
@@ -32,12 +32,18 @@ class CourseDetailWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(15.w, 5.h, 15.w, 0.h),
-      child: Column(
+      // 平板大屏：整表封顶并居中（手机端数值不变）
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560.0),
+          child: Column(
         children: [
           _WeekDisplayWidget(),
           SizedBox(height: 6.h),
           _CourseDisplayWidget(),
         ],
+      ),
+        ),
       ),
     );
   }
@@ -209,7 +215,7 @@ class _CourseDisplayWidget extends StatelessWidget {
             left: 0,
             top: 4 * (_singleCourseHeight + verStep),
             height: _middleStep,
-            width: 1.sw - 30.w,
+            width: _width,
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -227,7 +233,7 @@ class _CourseDisplayWidget extends StatelessWidget {
             left: 0,
             top: 8 * (_singleCourseHeight + verStep) + _middleStep,
             height: _middleStep,
-            width: 1.sw - 30.w,
+            width: _width,
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(

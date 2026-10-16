@@ -169,7 +169,7 @@ class _InnerSinglePostPicState extends State<InnerSinglePostPic> {
 
   Widget _buildCollapsedImageView(BuildContext context, Widget image) {
     return SizedBox(
-      height: (WePeiYangApp.screenWidth * 1.2).clamp(100.0, double.infinity),
+      height: (WePeiYangApp.screenWidth * 1.2).clamp(100.0, 560.0),
       child: ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(radius)),
         child: Stack(

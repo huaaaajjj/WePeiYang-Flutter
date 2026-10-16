@@ -44,7 +44,9 @@ class DialogSize {
 
   factory DialogSize.getSize(BuildContext context) {
     final windowWidth = MediaQuery.of(context).size.width;
-    final dialogWidth = windowWidth * 0.77;
+    // 平板等大屏下弹窗不再按屏宽百分比撑开（手机端数值不变）
+    final rawWidth = windowWidth * 0.77;
+    final dialogWidth = rawWidth < 480 ? rawWidth : 480.0;
     final horizontalPadding = dialogWidth * 0.1;
     final verticalPadding = dialogWidth * 0.07;
     final dialogRadius = dialogWidth * 0.077;

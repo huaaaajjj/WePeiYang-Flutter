@@ -65,7 +65,8 @@ class _RegisterPageOneState extends State<RegisterPageOne> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final width = size.width;
+    // 平板大屏：按钮宽度按手机栏折算（手机端数值不变）
+    final width = size.width.clamp(0.0, 520.0).toDouble();
     return Scaffold(
       // resizeToAvoidBottomInset: false,
       body: Container(
@@ -90,7 +91,11 @@ class _RegisterPageOneState extends State<RegisterPageOne> {
             Padding(
               padding: EdgeInsets.only(top: 130.h),
               child: SingleChildScrollView(
-                child: Column(
+                // 平板大屏：表单收进居中手机宽度栏（手机端数值不变）
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Column(
                   children: [
                     SizedBox(height: 62),
                     Padding(
@@ -360,6 +365,8 @@ class _RegisterPageOneState extends State<RegisterPageOne> {
                     ) //
                   ],
                 ),
+                ),
+                ),
               ),
             ),
           ],
@@ -433,7 +440,7 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
   @override
   Widget build(BuildContext context) {
     /// 两边的padding各30，中间间隔20
-    double width = WePeiYangApp.screenWidth;
+    double width = WePeiYangApp.screenWidth.clamp(0.0, 520.0).toDouble();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
@@ -459,7 +466,11 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
             Expanded(
                 child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
+              // 平板大屏：表单收进居中手机宽度栏（手机端数值不变）
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Column(
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,6 +728,8 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
                   ),
                 ],
               ),
+              ),
+              ),
             ))
           ],
         ),
@@ -795,7 +808,7 @@ class _RegisterPageThreeState extends State<RegisterPageThree> {
 
   @override
   Widget build(BuildContext context) {
-    double width = WePeiYangApp.screenWidth;
+    double width = WePeiYangApp.screenWidth.clamp(0.0, 520.0).toDouble();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -822,7 +835,11 @@ class _RegisterPageThreeState extends State<RegisterPageThree> {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
+                // 平板大屏：表单收进居中手机宽度栏（手机端数值不变）
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Column(
@@ -1058,6 +1075,8 @@ class _RegisterPageThreeState extends State<RegisterPageThree> {
                     //   ],
                     // ),
                   ],
+                ),
+                ),
                 ),
               ),
             )

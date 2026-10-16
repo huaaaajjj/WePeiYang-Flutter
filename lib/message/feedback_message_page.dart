@@ -204,10 +204,14 @@ class _FeedbackMessagePageState extends State<FeedbackMessagePage>
               ),
             ),
           ),
-          body: TabBarView(
+          // 平板大屏：消息列表收进居中窄栏（手机端不受影响）
+          body: Center(
+              child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 788.0),
+                  child: TabBarView(
               physics: ForceAdjustableScrollPhysics(scrollFactor: 5),
               controller: _tabController,
-              children: wd)),
+              children: wd)))),
     );
   }
 }

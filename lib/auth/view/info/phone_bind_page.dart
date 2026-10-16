@@ -50,7 +50,6 @@ class _PhoneBindPageState extends State<PhoneBindPage> {
 
   Widget _detail(BuildContext context) {
     final hintStyle = TextUtil.base.regular.sp(13).oldHintDarker(context);
-    double width = WePeiYangApp.screenWidth - 80;
     if (CommonPreferences.phone.value != "")
       return Column(children: [
         SizedBox(height: 70),
@@ -117,9 +116,10 @@ class _PhoneBindPageState extends State<PhoneBindPage> {
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Row(
               children: [
-                ConstrainedBox(
+                Expanded(
+                    child: ConstrainedBox(
                   constraints:
-                      BoxConstraints(maxHeight: 55, maxWidth: width / 2 + 20),
+                      BoxConstraints(maxHeight: 55),
                   child: TextField(
                     keyboardType: TextInputType.visiblePassword,
                     decoration: InputDecoration(
@@ -137,9 +137,10 @@ class _PhoneBindPageState extends State<PhoneBindPage> {
                     onChanged: (input) => setState(() => code = input),
                   ),
                 ),
+                ),
                 Container(
                   height: 55,
-                  width: width / 2 - 20,
+                  width: 135,
                   margin: const EdgeInsets.only(left: 20),
                   child: isPress
                       ? StreamBuilder<int>(

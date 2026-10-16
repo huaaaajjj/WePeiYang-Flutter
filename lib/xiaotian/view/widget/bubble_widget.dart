@@ -166,7 +166,7 @@ class _bubbleFromAiState extends State<bubbleFromAi>
             // 主体文本
             Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.92,
+                maxWidth: (MediaQuery.of(context).size.width * 0.92).clamp(0.0, 460.0).toDouble(),
               ),
               child: text.isEmpty
                   ? Baseline(
@@ -238,7 +238,7 @@ class bubbleFromAi_Text extends StatelessWidget {
             // --- 主体文本 ---
             Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.92,
+                  maxWidth: (MediaQuery.of(context).size.width * 0.92).clamp(0.0, 460.0).toDouble(),
                 ),
                 child: _AiMarkdown(text)),
             //AI声明
@@ -314,7 +314,7 @@ class bubbleFromUser extends StatelessWidget {
               margin: EdgeInsets.symmetric(vertical: 10.h),
               padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 15.w),
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
+                maxWidth: (MediaQuery.of(context).size.width * 0.7).clamp(0.0, 420.0).toDouble(),
               ),
               decoration: BoxDecoration(
                 color: WpyTheme.of(context).get(WpyColorKey.primaryActionColor),

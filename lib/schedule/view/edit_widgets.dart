@@ -391,7 +391,8 @@ class UnitPicker extends Dialog {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        width: 0.66.sw,
+        // 平板大屏：弹层宽度封顶（手机端数值不变）
+        width: (0.66.sw).clamp(0.0, 340.0).toDouble(),
         height: 150.h,
         margin: EdgeInsets.only(top: _top + 10.w),
         child: Material(
@@ -400,9 +401,9 @@ class UnitPicker extends Dialog {
           elevation: 5,
           child: Center(
             child: Container(
-              width: 0.5.sw,
+              width: (0.5.sw).clamp(0.0, 260.0).toDouble(),
               padding: EdgeInsets.all(5.r),
-              margin: EdgeInsets.only(right: 0.05.sw),
+              margin: EdgeInsets.only(right: (0.05.sw).clamp(0.0, 20.0).toDouble()),
               child: Row(children: children),
             ),
           ),
@@ -541,7 +542,8 @@ class WeekPicker extends Dialog {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        width: 0.8.sw,
+        // 平板大屏：弹层宽度封顶（手机端数值不变）
+        width: (0.8.sw).clamp(0.0, 380.0).toDouble(),
         height: 220.h,
         margin: EdgeInsets.only(top: _top + 10.w),
         child: Material(
@@ -553,9 +555,9 @@ class WeekPicker extends Dialog {
             children: [
               Container(
                 height: 150.h,
-                width: 0.65.sw,
+                width: (0.65.sw).clamp(0.0, 330.0).toDouble(),
                 padding: EdgeInsets.all(10.r),
-                margin: EdgeInsets.only(right: 0.05.sw),
+                margin: EdgeInsets.only(right: (0.05.sw).clamp(0.0, 20.0).toDouble()),
                 child: Row(children: children),
               ),
               Row(

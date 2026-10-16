@@ -77,16 +77,17 @@ class _GPAPageState extends State<GPAPage> {
               children: [
                 RadarChartWidget(_gpaColors),
                 GPAStatsWidget(_gpaColors),
-                SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                            maxWidth:
-                                context.watch<GPANotifier>().curveData.length >
-                                        4
-                                    ? 800.w
-                                    : 1.sw),
-                        child: GPACurve(_gpaColors, isPreview: false))),
+                Center(
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                              maxWidth:
+                                  context.watch<GPANotifier>().curveData.length >
+                                          4
+                                      ? 800.w
+                                      : 1.sw),
+                          child: GPACurve(_gpaColors, isPreview: false)))),
                 CourseListWidget(_gpaColors)
               ],
             ),

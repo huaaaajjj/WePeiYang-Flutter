@@ -64,7 +64,11 @@ class _LoginHomeWidgetState extends State<LoginHomeWidget> {
             gradient: WpyTheme.of(context)
                 .getGradient(WpyColorSetKey.primaryGradientAllScreen),
           ),
-          child: Column(
+          // 平板全宽：渐变背景仍铺满整屏，内容收进居中的手机宽度栏
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
             children: [
               Container(
                 alignment: Alignment.centerLeft,
@@ -166,6 +170,8 @@ class _LoginHomeWidgetState extends State<LoginHomeWidget> {
                           .bright(context))),
               Spacer(flex: 9),
             ],
+          ),
+            ),
           ),
         ),
       ),

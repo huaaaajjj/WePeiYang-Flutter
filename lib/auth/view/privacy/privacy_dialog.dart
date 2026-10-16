@@ -23,8 +23,12 @@ class PrivacyDialog extends Dialog {
       canPop: false,
       child: Container(
         alignment: Alignment.center,
+        // 平板大屏：卡片限宽 480 居中（手机端数值不变）
         margin: EdgeInsets.symmetric(
-            horizontal: 30, vertical: WePeiYangApp.screenHeight / 10),
+            horizontal: ((WePeiYangApp.screenWidth - 480) / 2)
+                .clamp(30.0, double.infinity)
+                .toDouble(),
+            vertical: WePeiYangApp.screenHeight / 10),
         padding: const EdgeInsets.fromLTRB(15, 5, 15, 0),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),

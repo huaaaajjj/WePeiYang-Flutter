@@ -493,7 +493,7 @@ class _inputBoxState extends State<inputBox> {
         builder: (context, inputState, chatState, _) {
       return Container(
         margin: EdgeInsets.symmetric(horizontal: 15.h),
-        width: 360.w,
+        width: double.infinity,
         height: 100.h,
         padding:
             EdgeInsets.only(left: 15.w, right: 15.w, top: 15.h, bottom: 5.h),

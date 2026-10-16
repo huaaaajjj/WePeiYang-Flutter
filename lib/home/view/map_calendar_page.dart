@@ -111,7 +111,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: 250.h,
+                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -156,7 +156,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: 250.h,
+                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -217,7 +217,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: 250.h,
+                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -260,7 +260,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: 250.h,
+                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(

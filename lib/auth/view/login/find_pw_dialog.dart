@@ -14,7 +14,8 @@ class FindPwDialog extends Dialog {
     return Center(
       child: Container(
         height: 160,
-        width: WePeiYangApp.screenWidth - 40,
+        // 平板大屏：弹窗宽度封顶（手机端数值不变）
+        width: (WePeiYangApp.screenWidth - 40).clamp(0.0, 460.0).toDouble(),
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),

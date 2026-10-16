@@ -132,7 +132,6 @@ class _FindPwByPhoneWidgetState extends State<FindPwByPhoneWidget> {
   Widget build(BuildContext context) {
     final TextStyle _hintStyle =
         TextUtil.base.regular.sp(13).oldHintDarker(context);
-    double width = WePeiYangApp.screenWidth - 80;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -177,10 +176,10 @@ class _FindPwByPhoneWidgetState extends State<FindPwByPhoneWidget> {
             SizedBox(height: 20),
             Row(
               children: [
-                ConstrainedBox(
+                Expanded(
+                    child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxHeight: 55,
-                    maxWidth: width / 2 + 20,
                   ),
                   child: TextField(
                     decoration: InputDecoration(
@@ -198,10 +197,11 @@ class _FindPwByPhoneWidgetState extends State<FindPwByPhoneWidget> {
                     onChanged: (input) => setState(() => code = input),
                   ),
                 ),
+                ),
                 SizedBox(width: 20),
                 SizedBox(
                     height: 55,
-                    width: width / 2 - 20,
+                    width: 135,
                     child: isPress
                         ? StreamBuilder<int>(
                             stream: Stream.periodic(

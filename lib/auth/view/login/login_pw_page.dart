@@ -104,7 +104,11 @@ class _LoginPwWidgetState extends State<LoginPwWidget> {
             gradient: WpyTheme.of(context)
                 .getGradient(WpyColorSetKey.primaryGradientAllScreen),
           ),
-          child: Column(
+          // 平板全宽：渐变背景铺满整屏，内容收进居中的手机宽度栏
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
@@ -213,6 +217,8 @@ class _LoginPwWidgetState extends State<LoginPwWidget> {
               ),
             ],
           ),
+            ),
+          ),
         ),
       ),
     );
@@ -229,8 +235,6 @@ class _LoginPwWidgetState extends State<LoginPwWidget> {
   final FocusNode _passwordFocus = FocusNode();
 
   Widget get _pwWidget {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -337,7 +341,7 @@ class _LoginPwWidgetState extends State<LoginPwWidget> {
         WButton(
           onPressed: _login,
           child: Container(
-            width: width - 60,
+            width: double.infinity,
             height: 48,
             decoration: BoxDecoration(
               color:
@@ -412,8 +416,6 @@ class _LoginPwWidgetState extends State<LoginPwWidget> {
   }
 
   Widget get _codeWidget {
-    final size = MediaQuery.of(context).size;
-    double width = size.width;
     var builder = (index) {
       return Container(
         alignment: AlignmentDirectional.center,
@@ -505,7 +507,7 @@ class _LoginPwWidgetState extends State<LoginPwWidget> {
         WButton(
           onPressed: _login,
           child: Container(
-            width: width - 60,
+            width: double.infinity,
             height: 48,
             decoration: BoxDecoration(
               color:

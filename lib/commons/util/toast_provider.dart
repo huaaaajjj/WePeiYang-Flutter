@@ -116,7 +116,7 @@ class ToastProvider with AsyncTimer {
                       )),
               SizedBox(width: 10),
               ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 1.sw - 90),
+                constraints: BoxConstraints(maxWidth: (1.sw - 90).clamp(0.0, 360.0).toDouble()),
                 child: Text(
                   msg,
                   style:
@@ -158,7 +158,7 @@ class ToastProvider with AsyncTimer {
               ),
               SizedBox(width: 10),
               ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 1.sw - 90),
+                constraints: BoxConstraints(maxWidth: (1.sw - 90).clamp(0.0, 360.0).toDouble()),
                 child: Text(
                   msg,
                   style:
@@ -200,7 +200,7 @@ class ToastProvider with AsyncTimer {
               ),
               SizedBox(width: 10),
               ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 1.sw - 90),
+                constraints: BoxConstraints(maxWidth: (1.sw - 90).clamp(0.0, 360.0).toDouble()),
                 child: Text(
                   msg,
                   style:

@@ -83,7 +83,11 @@ class _ClassTableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wholeWidth = MediaQuery.of(context).size.width - _schedulePadding * 2;
+    // 平板大屏：整表宽度封顶（手机端数值不变）
+    final wholeWidth =
+        (MediaQuery.of(context).size.width - _schedulePadding * 2)
+            .clamp(0.0, 707.0)
+            .toDouble();
     final cardWidth = (wholeWidth - 7 * _cardStep) / 7;
     final tabHeight = cardWidth * 136 / 96;
     final wholeHeight = tabHeight * 14 + _cardStep * 12 + _dateTabHeight;
@@ -104,11 +108,13 @@ class _ClassTableWidget extends StatelessWidget {
       child: _CourseDisplayWidget(cardWidth, room),
     );
 
-    return SizedBox(
-      height: wholeHeight,
-      width: wholeWidth,
-      child: Stack(
-        children: [weekBar, planGrid],
+    return Center(
+      child: SizedBox(
+        height: wholeHeight,
+        width: wholeWidth,
+        child: Stack(
+          children: [weekBar, planGrid],
+        ),
       ),
     );
   }
@@ -220,8 +226,12 @@ class _CourseDisplayWidget extends StatelessWidget {
 
     return SizedBox(
       height: singleCourseHeight * 14 + _cardStep * 14,
-      width:
-          MediaQuery.of(context).size.width - _schedulePadding * 2 - _cardStep,
+      // 平板大屏：表格宽度封顶（手机端数值不变）
+      width: (MediaQuery.of(context).size.width -
+              _schedulePadding * 2 -
+              _cardStep)
+          .clamp(0.0, 695.0)
+          .toDouble(),
       child: ListenableBuilder(
         listenable: loader,
         builder: (context, __) {
@@ -319,7 +329,7 @@ class _CourseDisplayWidget extends StatelessWidget {
           left: 0,
           top: 8 * (courseHeight + _cardStep) + _cardStep + middleStep,
           height: middleStep,
-          width: 1.sw - 30.w,
+          width: cardWidth * 7 + _cardStep * 6,
           child: Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(

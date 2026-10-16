@@ -104,7 +104,13 @@ Widget _inputArea(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          inputBox(),
+          // 平板大屏：输入框收进居中的手机宽度栏
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: inputBox(),
+            ),
+          ),
           Text(
             '内容由 AI 生成，请仔细甄别',
             style:
@@ -160,11 +166,17 @@ Widget PageControl(BuildContext context) {
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Expanded(
-        child: AnimatedSwitcher(
+        // 平板大屏：聊天内容收进居中的手机宽度栏
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
           child: content,
+        ),
+        ),
         ),
       ),
       // 首屏骨架阶段还没有真实结构，等加载完成再显示输入框

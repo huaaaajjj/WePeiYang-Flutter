@@ -159,7 +159,10 @@ class _LostAndFoundDetailPageState extends State<LostAndFoundDetailPage> {
     return completer.future;
   }
 
-  Widget MultipleImage(LostAndFoundPost post) => Row(
+  // 平板大屏：图片行限宽（手机端数值不变）
+  Widget MultipleImage(LostAndFoundPost post) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(
           post.imageUrls.length,
@@ -174,15 +177,19 @@ class _LostAndFoundDetailPageState extends State<LostAndFoundDetailPage> {
               borderRadius: BorderRadius.all(Radius.circular(8.r)),
               child: WpyPic(post.imageUrls[index],
                   fit: BoxFit.cover,
-                  width: (1.sw - 40.w - (post.imageUrls.length - 1) * 10.w) /
-                      post.imageUrls.length,
-                  height: (1.sw - 40.w - (post.imageUrls.length - 1) * 10.w) /
-                      post.imageUrls.length,
+                  width: ((1.sw - 40.w - (post.imageUrls.length - 1) * 10.w) /
+                          post.imageUrls.length)
+                      .clamp(0.0, 160.0)
+                      .toDouble(),
+                  height: ((1.sw - 40.w - (post.imageUrls.length - 1) * 10.w) /
+                          post.imageUrls.length)
+                      .clamp(0.0, 160.0)
+                      .toDouble(),
                   withHolder: true),
             ),
           ),
         ),
-      );
+      ));
 
   // 构建UI
   Widget buildDetailUI(BuildContext context, LostAndFoundPost post, findOwner,
@@ -508,7 +515,7 @@ class _LostAndFoundDetailPageState extends State<LostAndFoundDetailPage> {
                                   Navigator.pop(context);
                                 },
                                 child: Container(
-                                  width: MediaQuery.of(context).size.width,
+                                  width: (MediaQuery.of(context).size.width).clamp(0.0, 390.0).toDouble(),
                                   height: 30.h,
                                   alignment: Alignment.center,
                                   child: Text(
@@ -535,7 +542,7 @@ class _LostAndFoundDetailPageState extends State<LostAndFoundDetailPage> {
                                 }
                               },
                               child: Container(
-                                width: MediaQuery.of(context).size.width,
+                                width: (MediaQuery.of(context).size.width).clamp(0.0, 390.0).toDouble(),
                                 height: 30.h,
                                 alignment: Alignment.center,
                                 child: Text(
@@ -562,7 +569,7 @@ class _LostAndFoundDetailPageState extends State<LostAndFoundDetailPage> {
                           Navigator.pop(context);
                         },
                         child: Container(
-                          width: MediaQuery.of(context).size.width,
+                          width: (MediaQuery.of(context).size.width).clamp(0.0, 390.0).toDouble(),
                           height: 35.h,
                           alignment: Alignment.center,
                           child: Text(
@@ -986,7 +993,10 @@ class _SingleImageWidgetState extends State<SingleImageWidget> {
                   );
                 } else {
                   return SizedBox(
-                      height: WePeiYangApp.screenWidth * 1.2,
+                      // 平板大屏：长图占位限高（手机端数值不变）
+                      height: (WePeiYangApp.screenWidth * 1.2)
+                          .clamp(0.0, 560.0)
+                          .toDouble(),
                       child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(12.r)),
                         child: Stack(children: [

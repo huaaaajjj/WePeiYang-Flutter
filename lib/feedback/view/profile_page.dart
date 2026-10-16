@@ -121,7 +121,9 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             SizedBox(height: 4.h),
             SizedBox(
-              height: 144.h - 0.125.sw,
+              // 平板大屏：原按屏宽比例的 .sw 折成按设计宽度（x390）的 .w，
+              // 手机数值不变，避免在 1280dp 宽屏上算出负高度
+              height: 144.h - 48.75.w,
               child: Row(
                 children: [
                   Spacer(),
@@ -153,17 +155,17 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             SizedBox(
-              height: 0.125.sw,
+              height: 48.75.w,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      SizedBox(width: 18.w + 0.3.sw),
+                      SizedBox(width: 135.w),
                       ConstrainedBox(
                           constraints: BoxConstraints(
-                            maxWidth: 0.33.sw,
+                            maxWidth: 128.7.w,
                           ),
                           child: Text(CommonPreferences.lakeNickname.value,
                               textAlign: TextAlign.start,
@@ -218,12 +220,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   SizedBox(height: 8.h),
                   SizedBox(
-                    height: 0.125.sw + 12.h,
+                    height: 48.75.w + 12.h,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(width: 18.w + 0.3.sw),
+                        SizedBox(width: 135.w),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -328,7 +330,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
         Positioned(
-          top: 148.h - 0.15.sw,
+          top: 148.h - 58.5.w,
           left: 12.w,
           child: WButton(
             onPressed: () {
@@ -339,7 +341,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Hero(
               tag: 'avatar',
               child: UserAvatarImage(
-                size: 0.3.sw,
+                size: 117.w,
                 iconColor: WpyTheme.of(context)
                     .get(WpyColorKey.primaryBackgroundColor),
                 context: context,

@@ -151,12 +151,16 @@ class FloorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final areaName = RegExp(r'\d$').hasMatch(name) ? '$name层' : name;
+    // 平板大屏：每行房间数随宽度自适应（手机保持 4 个/行）；
+    // 83.w 为单个房间格（67.w + 左右 8.w 间距）的步进宽度
+    final perRow =
+        ((MediaQuery.of(context).size.width - 50.w) / 83.w).floor().clamp(4, 12);
     final roomsGridView = Column(
       children: [
-        for (int i = 0; i < rooms.length; i += 4)
+        for (int i = 0; i < rooms.length; i += perRow)
           Row(
             children: [
-              for (int j = 0; j < 4; j++)
+              for (int j = 0; j < perRow; j++)
                 if (i + j < rooms.length)
                   Padding(
                     padding:

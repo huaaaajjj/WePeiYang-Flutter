@@ -75,8 +75,9 @@ class BuildingGrid extends StatelessWidget {
       onVerticalDragUpdate: (details) => handleDetail(synchronizer, details),
       child: GridView.builder(
         controller: _sc2,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
+        // 平板大屏：列数随宽度自适应（70.w 格宽下手机恰为 5 列，数值不变）
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 70.w,
           childAspectRatio: 0.7,
         ),
         // physics: list.length <= 15 ? NeverScrollableScrollPhysics() : null,

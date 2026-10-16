@@ -202,7 +202,11 @@ class LostAndFoundSubPageState extends State<LostAndFoundSubPage>
               child: Selector<LAFoundModel, String>(
                 selector: (context, model) =>
                     model.currentCategory[widget.type]!,
-                builder: (context, category, _) => Flex(
+                // 平板大屏：分类胶囊行收进居中窄栏（手机端不受影响）
+                builder: (context, category, _) => Center(
+                    child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 460.w),
+                        child: Flex(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   direction: Axis.horizontal,
                   children: <Widget>[
@@ -253,6 +257,8 @@ class LostAndFoundSubPageState extends State<LostAndFoundSubPage>
                     ),
                   ],
                 ),
+                    ),
+                    ),
               ),
             ),
             //TODO: 这里的组建树太逆天了 请来整理一下
@@ -304,11 +310,12 @@ class LostAndFoundSubPageState extends State<LostAndFoundSubPage>
                               onRefresh: _onRefresh,
                               onLoading: _onLoading,
                               child: WaterfallFlow.builder(
+                                // 平板大屏：列数按最大格宽自适应（手机仍为 2 列）
                                 gridDelegate:
-                                    SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+                                    SliverWaterfallFlowDelegateWithMaxCrossAxisExtent(
                                   mainAxisSpacing: 10.w,
                                   crossAxisSpacing: 10.w,
-                                  crossAxisCount: 2,
+                                  maxCrossAxisExtent: 190.w,
                                 ),
                                 controller: _scrollController,
                                 itemCount: tuple.item1.length,

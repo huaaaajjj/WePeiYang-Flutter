@@ -198,9 +198,10 @@ class _LostAndFoundSearchResultPageState
                     ),
                     onRefresh: _onRefresh,
                     onLoading: _onLoading,
-                    child: MasonryGridView.count(
+                    // 平板大屏：列数随宽度自适应（手机仍为 2 列）
+                    child: MasonryGridView.extent(
                       controller: _scrollController,
-                      crossAxisCount: 2,
+                      maxCrossAxisExtent: 190.w,
                       itemCount: postList.length,
                       itemBuilder: (BuildContext context, int index) => InkWell(
                           onTap: () {

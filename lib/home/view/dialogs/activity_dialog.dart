@@ -1,5 +1,7 @@
 // @dart=2.12
 
+import 'dart:math' as math;
+
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,13 +28,18 @@ class ActivityDialog extends Dialog {
     final data = banners;
     if (data.isEmpty) return SizedBox.shrink();
 
+    // 平板大屏修复：海报同时受宽高两轴限制（旧 1.08.sw 在 800dp 高的横屏上
+    // 高约 1382dp，超出屏幕且下方关闭条高度会算出负值）
+    final posterH = math.min(1.08.sw, 0.62.sh);
+    final posterW = posterH * 0.75;
+
     return Column(
       children: [
         Spacer(),
         if (data.length == 1)
           SizedBox(
-            width: 0.81.sw,
-            height: 1.08.sw,
+            width: posterW,
+            height: posterH,
             child: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(20)),
               child: WButton(
@@ -68,7 +75,7 @@ class ActivityDialog extends Dialog {
           )
         else
           SizedBox(
-            height: 1.08.sw,
+            height: posterH,
             child: Swiper(
               loop: true,
               autoplay: true,
@@ -116,7 +123,7 @@ class ActivityDialog extends Dialog {
             },
             child: SizedBox(
               width: 1.sw,
-              height: 0.55.sh - 0.54.sw,
+              height: math.max(0.55.sh - 0.54.sw, 0.12.sh),
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Image.asset(

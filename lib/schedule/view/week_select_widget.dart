@@ -31,14 +31,16 @@ class WeekSelectWidget extends StatelessWidget {
         var current = provider.currentWeek;
         if (current == 1) current++;
 
-        double offset = 0.25.sw - _canvasWidth.w - 25.w;
+        // 平板大屏：单周步进封顶 120dp（手机端数值不变）
+        double offset =
+            (0.25.sw).clamp(0.0, 120.0).toDouble() - _canvasWidth.w - 25.w;
         if (offset < 0) offset = 0;
         return ListView.builder(
             itemCount: provider.weekCount,
             scrollDirection: Axis.horizontal,
             controller: ScrollController(
                 initialScrollOffset:
-                    (current - 2) * (_canvasWidth + 25 + offset)),
+                    (current - 2) * (offset + _canvasWidth.w + 25.w)),
             itemBuilder: (context, i) {
               /// 为了让splash起到遮挡的效果,故而把InkWell放在Stack顶层
               return Padding(

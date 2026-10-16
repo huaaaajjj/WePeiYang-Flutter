@@ -57,6 +57,17 @@ void main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
+    /// 屏幕方向：手机锁竖屏（维持原有体验）；平板/大屏交由系统决定，
+    /// 以便横屏使用（AndroidManifest 已移除 portrait 锁定）
+    if (Platform.isAndroid) {
+      final _view = WidgetsBinding.instance.platformDispatcher.views.first;
+      final _size = _view.physicalSize / _view.devicePixelRatio;
+      if (_size.shortestSide < 600) {
+        await SystemChrome.setPreferredOrientations(
+            [DeviceOrientation.portraitUp]);
+      }
+    }
+
     /// 初始化环境变量
     EnvConfig.init();
     await StorageUtil.init();
@@ -505,44 +516,32 @@ class WePeiYangAppState extends State<WePeiYangApp>
       },
     );
 
-    // 平板等大屏适配：把应用装进居中的手机比例列（宽度上限 480dp），并让
-    // ScreenUtil 按该列尺寸重算缩放。否则横屏平板上 .w 会按整块屏宽放大 3 倍
-    // 以上（designSize 390 宽 vs 平板 1280dp 宽），弹窗、按钮全面溢出。
+    // 平板等大屏适配：横向全宽铺开（不再压缩成居中小列），同时把
+    // ScreenUtil 的缩放系数按轴封顶在手机档位——否则 .w 会按整块屏宽放大
+    // 3 倍以上（designSize 390 宽 vs 平板 1280dp 宽），弹窗、按钮全面溢出。
+    // 实现方式：designSize 放大为 屏幕尺寸/S（S≈1.23），_data 保持真实屏幕
+    // 尺寸，因此 .sw / MediaQuery 仍是整屏宽度（全出血背景、铺满布局正常），
+    // 而 .w/.h/.sp 只放大 S 倍（与已验证的旧列模式缩放完全一致）。
     // 放在 MaterialApp.builder 里可保证每帧晚于 ScreenUtilInit 初始化执行。
     final mq = MediaQuery.of(context);
     if (mq.size.shortestSide < 600) return body;
 
-    final width = mq.size.width < 480 ? mq.size.width : 480.0;
-    final height = mq.size.height < width * 844 / 390
-        ? mq.size.height
-        : width * 844 / 390;
-    final size = Size(width, height);
-
+    const scaleCap = 1.2308; // 480/390，与旧版居中小列的横向缩放一致
     ScreenUtil.configure(
-      data: mq.copyWith(size: size),
-      designSize: const Size(390, 844),
+      data: mq,
+      designSize: Size(
+        mq.size.width / scaleCap < 390 ? 390 : mq.size.width / scaleCap,
+        mq.size.height / scaleCap < 844 ? 844 : mq.size.height / scaleCap,
+      ),
       minTextAdapt: true,
       splitScreenMode: false,
     );
 
-    // 平板大屏已按 480x800 手机比例呈现，不能算"折叠屏内屏"：
-    // 否则 TextUtil.sp() 会执行 `s.sp - 10`，把 sp(10) 压成约 2dp 的
-    // 微缩字（登录页条款行实测如此），sp(14/16) 也变得过小。
+    // 大屏不按"折叠屏内屏"处理（否则 TextUtil.sp() 执行 `s.sp - 10`，
+    // 把 sp(10) 压成约 2dp 的微缩字，登录页条款行实测如此）。
     TextUtil.updateScreenState(false);
 
-    return ColoredBox(
-      color: WpyTheme.of(context).get(WpyColorKey.primaryBackgroundColor),
-      child: Center(
-        child: SizedBox(
-          width: width,
-          height: height,
-          child: MediaQuery(
-            data: mq.copyWith(size: size),
-            child: body,
-          ),
-        ),
-      ),
-    );
+    return body;
   }
 }
 

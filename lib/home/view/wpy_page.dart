@@ -246,7 +246,12 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
         if (CommonPreferences.showMap.value) const MapAndCalender(),
         Padding(
           padding: EdgeInsets.fromLTRB(30.w, 0, 30.w, 0),
-          child: TabBar(
+          // 平板大屏：TabBar 限宽（手机端不受影响）
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 340.w),
+              child: TabBar(
               controller: _tc,
               dividerHeight: 0,
               labelStyle: TextUtil.base.w400.sp(14),
@@ -270,6 +275,8 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                     alignment: Alignment.centerLeft,
                     child: Tab(text: 'Exam Detail')),
               ]),
+            ),
+          ),
         ),
         SizedBox(
           height: MediaQuery.of(context).size.height - 365.h,

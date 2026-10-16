@@ -208,18 +208,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(18.0), topRight: Radius.circular(18.0)),
       ),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        child: SafeArea(
-          child: Row(
+      child: SafeArea(
+        // 平板大屏：图标收进居中 480dp 区域（手机端不受影响）
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               for (var i = 0; i < _tabs.length; i++)
                 _buildBottomNavigationItem(_tabs[i], i),
             ],
           ),
+          ),
+          ),
         ),
-      ),
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
