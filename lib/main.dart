@@ -308,8 +308,8 @@ class WePeiYangAppState extends State<WePeiYangApp>
       var mediaQueryData = MediaQuery.of(baseContext);
       WePeiYangApp.screenWidth = mediaQueryData.size.width;
       WePeiYangApp.screenHeight = mediaQueryData.size.height;
-      // 判断屏幕状态
-      bool isInnerScreen =
+      // 判断屏幕状态（平板等大屏不做"折叠屏内屏"处理，否则 sp() 会 -10 变成微缩字）
+      bool isInnerScreen = mediaQueryData.size.shortestSide < 600 &&
           (mediaQueryData.size.height / mediaQueryData.size.width) < 1.4;
       TextUtil.updateScreenState(isInnerScreen);
 
@@ -332,7 +332,8 @@ class WePeiYangAppState extends State<WePeiYangApp>
     if (!mounted) return;
     var mediaQueryData = MediaQuery.of(context);
 
-    bool isInnerScreen =
+    // 平板等大屏不做"折叠屏内屏"处理（同 initState 注释）
+    bool isInnerScreen = mediaQueryData.size.shortestSide < 600 &&
         (mediaQueryData.size.height / mediaQueryData.size.width) < 1.4;
     TextUtil.updateScreenState(isInnerScreen);
     // 触发重新渲染
