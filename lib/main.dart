@@ -525,6 +525,11 @@ class WePeiYangAppState extends State<WePeiYangApp>
       splitScreenMode: false,
     );
 
+    // 平板大屏已按 480x800 手机比例呈现，不能算"折叠屏内屏"：
+    // 否则 TextUtil.sp() 会执行 `s.sp - 10`，把 sp(10) 压成约 2dp 的
+    // 微缩字（登录页条款行实测如此），sp(14/16) 也变得过小。
+    TextUtil.updateScreenState(false);
+
     return ColoredBox(
       color: WpyTheme.of(context).get(WpyColorKey.primaryBackgroundColor),
       child: Center(
