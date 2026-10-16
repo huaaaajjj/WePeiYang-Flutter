@@ -219,7 +219,7 @@ class _PersonPageState extends State<PersonPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 1.sw - 140.w,
+                width: (1.sw - 140.w).clamp(0.0, 600.0).toDouble(),
                 child: Text('${nickName ?? ''}',
                     textAlign: TextAlign.start,
                     maxLines: 3,
@@ -375,7 +375,7 @@ class _PersonPageState extends State<PersonPage> {
                             ? '${EnvConfig.QNHD}avatar/beam/20/${uid}.svg'
                             : 'https://qnhdpic.twt.edu.cn/download/origin/${avatar}',
                         width: 1.sw,
-                        height: 1.sw,
+                        height: (0.6.sh).clamp(0.0, 1.sw).toDouble(),
                         fit: BoxFit.cover,
                         alignment: Alignment.topCenter,
                       ),
@@ -385,7 +385,7 @@ class _PersonPageState extends State<PersonPage> {
                       child: InkWell(
                         onTap: () => Navigator.pop(context),
                         child: Container(
-                          height: 1.sw,
+                          height: (0.6.sh).clamp(0.0, 1.sw).toDouble(),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [

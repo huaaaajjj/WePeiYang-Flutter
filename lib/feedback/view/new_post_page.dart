@@ -1225,7 +1225,7 @@ class _ImagesGridViewState extends State<ImagesGridView> {
             ),
             child: Icon(
               Icons.edit,
-              size: MediaQuery.of(context).size.width / 32,
+              size: 12.w,
               color: WpyTheme.of(context)
                   .get(WpyColorKey.secondaryBackgroundColor),
             ),
@@ -1295,8 +1295,9 @@ class _ImagesGridViewState extends State<ImagesGridView> {
 
   @override
   Widget build(BuildContext context) {
-    var gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 4, //方便右边宽度留白哈哈
+    // 平板大屏：列数随宽度自适应（手机仍为 4 列）
+    var gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 90.w,
       childAspectRatio: 1,
       crossAxisSpacing: 6,
       mainAxisSpacing: 6,

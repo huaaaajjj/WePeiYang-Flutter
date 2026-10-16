@@ -386,10 +386,14 @@ class _SearchResultPageState extends State<SearchResultPage> {
             appBar: appBar,
             backgroundColor:
                 WpyTheme.of(context).get(WpyColorKey.primaryBackgroundColor),
-            body: AnimatedSwitcher(
+            // 平板大屏：搜索结果收进居中窄栏（手机端不受影响）
+            body: Center(
+                child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 788.0),
+                    child: AnimatedSwitcher(
               duration: Duration(milliseconds: 500),
               child: body,
-            )),
+            )))),
         onHorizontalDragUpdate: (DragUpdateDetails details) {
           if (details.delta.dx > 20) {
             Navigator.pop(context, true);

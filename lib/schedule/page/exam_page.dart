@@ -66,7 +66,11 @@ class _ExamPageState extends State<ExamPage> {
       backgroundColor:
           WpyTheme.of(context).get(WpyColorKey.secondaryBackgroundColor),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        // 平板大屏：列表收进居中 720 宽（手机端数值不变）
+        padding: EdgeInsets.symmetric(
+            horizontal: ((1.sw - 720) / 2)
+                .clamp(10.w, double.infinity)
+                .toDouble()),
         child: Consumer<ExamProvider>(
           builder: (context, provider, _) {
             List<Widget> unfinished = provider.unfinished.isEmpty

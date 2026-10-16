@@ -394,7 +394,10 @@ class _PostDetailPageState extends State<PostDetailPage>
       final post = widget.post;
       final theme = WpyTheme.of(context);
       final mediaQuery = MediaQuery.of(context);
-      final width = context.size?.width ?? mediaQuery.size.width;
+      // 平板大屏：分享长图按手机宽度渲染（手机端数值不变）
+      final width = (context.size?.width ?? mediaQuery.size.width)
+          .clamp(0.0, 480.0)
+          .toDouble();
       final footer = theme.brightness == Brightness.dark
           ? 'assets/images/bottom_bar_black.png'
           : 'assets/images/bottom_bar_white.png';

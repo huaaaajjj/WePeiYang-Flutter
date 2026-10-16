@@ -187,7 +187,11 @@ class _HistoryPageState extends State<HistoryPage> {
           onRefresh: _onRefresh,
           enablePullUp: true,
           onLoading: _onLoading,
-          child: body,
+          // 平板大屏：列表收进居中窄栏（手机端不受影响）
+          child: Center(
+              child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 788.0),
+                  child: body)),
         ),
       ),
     );
