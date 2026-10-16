@@ -109,9 +109,13 @@ class _ProfilePageState extends State<ProfilePage> {
           alignment: Alignment.center,
           child: Text("暂无冒泡", style: TextUtil.base.oldThirdAction(context)));
     } else {
-      postListShow = Column(
+      // 平板大屏：我的帖子收进与论坛一致的居中阅读栏（手机端不受影响）
+      postListShow = Center(
+          child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 788.0),
+              child: Column(
         children: postLists,
-      );
+      )));
     }
     //静态header，头像和资料以及appbar
     Widget appBar = Stack(
