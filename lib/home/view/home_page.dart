@@ -210,7 +210,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
       child: SafeArea(
         // 平板大屏：图标收进居中 480dp 区域（手机端不受影响）
+        // heightFactor: 1 必须保留——否则 Center 会在底部导航槽位里纵向撑满全屏
         child: Center(
+          heightFactor: 1,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: Row(
