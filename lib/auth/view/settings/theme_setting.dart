@@ -399,7 +399,8 @@ class _ThemeSettingState extends State<ThemeSetting>
       builder: (context, child) {
         final clipValue = _clipAnim.value;
         return Container(
-          height: 0.45.sw,
+          // 平板大屏：预览卡限高（手机端数值不变）
+          height: (0.45.sw).clamp(0.0, 300.0).toDouble(),
           margin: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
@@ -541,8 +542,9 @@ class _ThemeSettingState extends State<ThemeSetting>
           GridView(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
+            // 平板大屏：列数随宽度自适应（手机仍为 4 列）
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 90.w,
               childAspectRatio: 0.78,
               crossAxisSpacing: 10.w,
               mainAxisSpacing: 12.h,
@@ -711,8 +713,9 @@ class ThemeSection extends StatelessWidget {
           GridView(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+            // 平板大屏：列数随宽度自适应（手机仍为 3 列）
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 120.w,
               childAspectRatio: 1.5,
               crossAxisSpacing: 6.w,
               mainAxisSpacing: 6.h,

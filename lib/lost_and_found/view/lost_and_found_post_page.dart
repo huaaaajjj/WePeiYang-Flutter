@@ -205,6 +205,11 @@ class _LostAndFoundPostPageState extends State<LostAndFoundPostPage> {
         body: SingleChildScrollView(
           child: Container(
               padding: EdgeInsets.all(16.r),
+              // 平板大屏：表单收进居中 700 宽（手机端数值不变）
+              margin: EdgeInsets.symmetric(
+                  horizontal: ((MediaQuery.of(context).size.width - 732) / 2)
+                      .clamp(0.0, double.infinity)
+                      .toDouble()),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 LostAndFoundTitleInputField(),
                 LostAndFoundContentInputField(),

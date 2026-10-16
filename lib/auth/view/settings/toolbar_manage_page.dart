@@ -338,9 +338,10 @@ class _ToolbarManagePageState extends State<ToolbarManagePage> {
                             key: _gridViewKey,
                             controller: _scrollController,
                             children: children,
+                            // 平板大屏：列数随宽度自适应（手机仍为 2 列）
                             gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
+                                SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 180.w,
                               childAspectRatio: 30 / 19,
                               crossAxisSpacing: 15.w,
                             ));

@@ -10,7 +10,11 @@ class ClassesNeedVPNDialog extends Dialog {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 30),
+        // 平板大屏：提示卡限宽 480 居中（手机端数值不变）
+        margin: EdgeInsets.symmetric(
+            horizontal: ((MediaQuery.of(context).size.width - 480) / 2)
+                .clamp(30.0, double.infinity)
+                .toDouble()),
         padding: const EdgeInsets.symmetric(horizontal: 30),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
