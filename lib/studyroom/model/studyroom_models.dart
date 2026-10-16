@@ -60,6 +60,13 @@ class Room {
         json['building_id'],
         json['free']);
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'building_id': buildingId,
+        'free': isFree,
+      };
 }
 
 class Occupy {

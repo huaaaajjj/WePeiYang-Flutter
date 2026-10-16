@@ -94,6 +94,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       UmengCommonSdk.onProfileSignIn(CommonPreferences.account.value);
       // 刷新自习室数据
       context.read<CampusProvider>().init();
+      context.read<FavorProvider>().init();
     });
     if (widget.page != null) _tabController.animateTo(_currentIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {

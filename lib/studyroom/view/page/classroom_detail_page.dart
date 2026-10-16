@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:we_pei_yang_flutter/commons/themes/template/wpy_theme_data.dart';
 import 'package:we_pei_yang_flutter/commons/themes/wpy_theme.dart';
 import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/commons/util/time.util.dart';
+import 'package:we_pei_yang_flutter/commons/util/toast_provider.dart';
 import 'package:we_pei_yang_flutter/studyroom/model/studyroom_models.dart';
+import 'package:we_pei_yang_flutter/studyroom/model/studyroom_provider.dart';
 import 'package:we_pei_yang_flutter/studyroom/model/studyroom_service.dart';
 import 'package:we_pei_yang_flutter/studyroom/view/widget/base_page.dart';
 
@@ -60,13 +63,46 @@ Widget _PageTitleWidget(Room room, String areaName, BuildContext context) {
         ),
       ),
       const Spacer(),
-      // TODO: 依然 收藏暂时被砍掉了
-      // Padding(
-      //   padding: EdgeInsets.only(right: 3.w),
-      //   child: _FavorButton(room),
-      // ),
+      Padding(
+        padding: EdgeInsets.only(right: 3.w),
+        child: _FavorButton(room),
+      ),
     ],
   );
+}
+
+class _FavorButton extends StatelessWidget {
+  final Room room;
+
+  const _FavorButton(this.room, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final favored = context.select((FavorProvider f) => f.isFavor(room.id));
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.r),
+        ),
+        minimumSize: Size(1, 1),
+        padding: EdgeInsets.fromLTRB(12.w, 3.w, 12.w, 3.w),
+      ),
+      onPressed: () async {
+        final ok = await context.read<FavorProvider>().toggle(room);
+        if (!ok) ToastProvider.error('操作失败，请重试');
+      },
+      child: Text(
+        favored ? '已收藏' : '+ 收藏',
+        style: TextStyle(
+          color: WpyTheme.of(context).get(WpyColorKey.primaryActionColor),
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
 }
 
 double get _cardStep => 6.w;

@@ -106,6 +106,9 @@ class CommonPreferences {
   static final termName = PrefsBean<String>('termName', '22232');
   static final termStartDate = PrefsBean<String>('termStartDate', '2023-02-20');
 
+  /// 自习室收藏的本地缓存（id -> Room JSON），用于无网/未登录时展示收藏卡片
+  static final favorRoomCache = PrefsBean<String>('favorRoomCache', '');
+
   /// cookies in classes.tju.edu.cn
   static final gSessionId = PrefsBean<String>('gsessionid'); // GSESSIONID
   static final garbled = PrefsBean<String>('garbled'); // UqZBpD3n3iXPAw1X

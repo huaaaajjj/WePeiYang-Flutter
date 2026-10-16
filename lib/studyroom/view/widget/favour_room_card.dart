@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/studyroom/model/studyroom_models.dart';
+import 'package:we_pei_yang_flutter/studyroom/model/studyroom_provider.dart';
 import 'package:we_pei_yang_flutter/studyroom/model/studyroom_router.dart';
 import 'package:we_pei_yang_flutter/studyroom/util/studyroom_images.dart';
 import 'package:we_pei_yang_flutter/studyroom/view/widget/room_card.dart';
@@ -23,9 +25,13 @@ class FavourRoomCard extends StatelessWidget {
 
     return WButton(
       onPressed: () {
+        final areaName = context
+                .read<CampusProvider>()
+                .buildingNameOf(room.buildingId) ??
+            '';
         Navigator.of(context).pushNamed(
           StudyRoomRouter.detail,
-          arguments: room,
+          arguments: {'room': room, 'areaName': areaName},
         );
       },
       child: Container(
