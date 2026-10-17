@@ -22,6 +22,7 @@ import 'package:we_pei_yang_flutter/feedback/view/lake_home_page/normal_sub_page
 import 'package:we_pei_yang_flutter/feedback/view/new_post_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/post_detail_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/post_split.dart';
+import 'package:we_pei_yang_flutter/feedback/util/splitscreen_util.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_result_page.dart';
 import 'package:we_pei_yang_flutter/message/feedback_message_page.dart';
@@ -304,8 +305,8 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
   Widget _buildSearchBar() {
     return WButton(
       onPressed: () {
-        // 平板分栏：搜索页开进左栏，右栏详情保持；手机端照常压路由
-        if (MediaQuery.of(context).size.shortestSide >= 600) {
+        // 平板横屏分栏：搜索页开进左栏，右栏详情保持；竖屏/手机端照常压路由
+        if (SplitUtil.useTabletLayout(context)) {
           _openSearch();
         } else {
           Navigator.pushNamed(context, FeedbackRouter.search);
@@ -721,7 +722,8 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
               );
             }),
         );
-        if (MediaQuery.of(context).size.shortestSide < 600) return body;
+        // 平板横屏才分栏；竖屏回落手机版式（翻转到横屏会自动恢复分栏）
+        if (!SplitUtil.useTabletLayout(context)) return body;
         // 平板：左侧列表 + 右侧内嵌帖子详情（左栏点击经 PostSplitScope 选中）；
         // 左栏可叠加内嵌搜索页/搜索结果页（不压全屏路由），IndexedStack 保住信息流状态
         return PostSplitScope(

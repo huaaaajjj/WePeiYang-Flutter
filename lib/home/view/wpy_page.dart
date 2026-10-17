@@ -18,6 +18,7 @@ import 'package:we_pei_yang_flutter/commons/util/toast_provider.dart';
 import 'package:we_pei_yang_flutter/commons/widgets/colored_icon.dart';
 import 'package:we_pei_yang_flutter/commons/widgets/scroll_synchronizer.dart';
 import 'package:we_pei_yang_flutter/commons/widgets/w_button.dart';
+import 'package:we_pei_yang_flutter/feedback/util/splitscreen_util.dart';
 import 'package:we_pei_yang_flutter/gpa/view/gpa_curve_detail.dart';
 import 'package:we_pei_yang_flutter/message/feedback_message_page.dart';
 import 'package:we_pei_yang_flutter/schedule/view/wpy_course_widget.dart';
@@ -263,8 +264,8 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
       );
 
   Widget _functionCardsView() {
-    // 平板大屏：左栏工具卡两列网格 + 右栏 Study Room/GPA/Exam（手机端保持原样）
-    if (MediaQuery.of(context).size.shortestSide >= 600) {
+    // 平板横屏：左栏工具卡两列网格 + 右栏 Study Room/GPA/Exam（竖屏/手机保持原样）
+    if (SplitUtil.useTabletLayout(context)) {
       return _functionCardsViewWide();
     }
     return Column(
