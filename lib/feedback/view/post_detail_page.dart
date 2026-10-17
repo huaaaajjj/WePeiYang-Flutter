@@ -881,6 +881,13 @@ class _PostDetailPageState extends State<PostDetailPage>
         canPop: true,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
+          final splitScope = PostSplitScope.maybeOf(context);
+          if ((widget.split ?? false) && splitScope != null) {
+            // 分栏内嵌：返回键由外层主页拦截，这里只清空右栏选择。
+            // 绝不能 pop——会把整个主页路由弹掉（黑屏/跌回启动页）。
+            splitScope.clear();
+            return;
+          }
           Navigator.pop(context, widget.post);
         },
         child: GestureDetector(
