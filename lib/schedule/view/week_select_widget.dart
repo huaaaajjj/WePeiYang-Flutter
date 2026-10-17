@@ -101,17 +101,18 @@ class WeekSelectWidget extends StatelessWidget {
   Widget _buildVertical(BuildContext context) {
     var listView = Builder(builder: (context) {
       var provider = context.watch<CourseProvider>();
-      var current = provider.currentWeek;
-      if (current == 1) current++;
 
-      // 单个条目约估高度（画布 + 文字 + 间距），只为把当前周滚入视野
+      // 单个条目约估高度（画布 + 文字 + 间距），只为把已选周滚入视野
+      // 定位按已选周（而非当前周）：收起后重新展开仍回到所选的那一周
       double itemHeight = _canvasHeight + 50.h;
+      double targetOffset = (provider.selectedWeek - 1) * itemHeight;
+      if (targetOffset < 0) targetOffset = 0;
       return ListView.builder(
           itemCount: provider.weekCount,
           scrollDirection: Axis.vertical,
           padding: EdgeInsets.symmetric(vertical: 6.h),
           controller: ScrollController(
-              initialScrollOffset: (current - 2) * itemHeight),
+              initialScrollOffset: targetOffset, keepScrollOffset: false),
           itemBuilder: (context, i) {
             /// 为了让splash起到遮挡的效果,故而把InkWell放在Stack顶层
             return Center(
@@ -156,7 +157,15 @@ class WeekSelectWidget extends StatelessWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: shrink ? 0 : _canvasWidth + 50.w,
-            child: shrink ? SizedBox.shrink() : listView,
+            // 收起只把这一列裁掉、不卸载列表：展开后周列的滚动位置原地不动
+            child: ClipRect(
+              child: OverflowBox(
+                alignment: Alignment.centerLeft,
+                minWidth: _canvasWidth + 50.w,
+                maxWidth: _canvasWidth + 50.w,
+                child: listView,
+              ),
+            ),
           );
         },
       ),
