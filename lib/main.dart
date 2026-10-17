@@ -43,6 +43,7 @@ import 'commons/util/toast_provider.dart';
 import 'commons/widgets/wpy_pic.dart';
 import 'feedback/model/feedback_providers.dart';
 import 'feedback/network/post.dart';
+import 'feedback/util/splitscreen_util.dart';
 import 'gpa/model/gpa_notifier.dart';
 import 'lost_and_found/module/lost_and_found_providers.dart';
 import 'message/model/message_provider.dart';
@@ -541,6 +542,10 @@ class WePeiYangAppState extends State<WePeiYangApp>
     // 大屏不按"折叠屏内屏"处理（否则 TextUtil.sp() 执行 `s.sp - 10`，
     // 把 sp(10) 压成约 2dp 的微缩字，登录页条款行实测如此）。
     TextUtil.updateScreenState(false);
+
+    // 同理：全宽布局下 SplitUtil 不再按"半屏"折算，否则海棠详情页的
+    // 评论头像、间距等只有半尺寸（手机上该开关本就不生效）。
+    SplitUtil.needHorizontalView = false;
 
     return body;
   }
