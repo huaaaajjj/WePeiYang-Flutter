@@ -78,6 +78,8 @@ class BuildingGrid extends StatelessWidget {
         // 平板大屏：列数随宽度自适应（70.w 格宽下手机恰为 5 列，数值不变）
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 70.w,
+          crossAxisSpacing: 6.w,
+          mainAxisSpacing: 8.h,
           childAspectRatio: 0.7,
         ),
         // physics: list.length <= 15 ? NeverScrollableScrollPhysics() : null,

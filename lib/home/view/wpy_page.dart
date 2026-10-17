@@ -238,13 +238,14 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  /// 平板大屏：首页内容收进居中窄栏（与其他页面一致的 788 阅读栏；
-  /// 手机端宽度小于该值时无任何影响）。渐变/白色底板仍保持通栏。
-  /// 用 Align.topCenter 而非 Center：HELLO 那层在 Stack 里，Center 会把它纵向居中。
+  /// 平板大屏：首页内容收进居中窄栏（手机端宽度小于该值时无任何影响）。
+  /// 首页是仪表盘，比阅读页的 788 放宽到 1080，两栏布局才不拥挤；
+  /// 渐变/白色底板仍保持通栏。用 Align.topCenter 而非 Center：
+  /// HELLO 那层在 Stack 里，Center 会把它纵向居中。
   Widget _readingColumn(Widget child) => Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 788.0),
+          constraints: const BoxConstraints(maxWidth: 1080.0),
           child: child,
         ),
       );
@@ -335,15 +336,17 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 372,
+              width: 400,
               child: SliverCardsWidget(
                 CommonPreferences.displayedTool.value,
                 axis: Axis.vertical,
               ),
             ),
-            SizedBox(width: 20),
+            SizedBox(width: 32),
             Expanded(
               child: Column(
+                // stretch：TabBar 撑满右栏宽度均分三份（否则会缩到内容宽度、标签挤成一团）
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
                     padding: EdgeInsets.fromLTRB(22.w, 0, 26.w, 0),
@@ -375,15 +378,15 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                       ]),
                   ),
                   SizedBox(
-                    height: 640.h,
+                    height: 500.h,
                     child: TabBarView(
                         controller: _tc,
                         physics: BouncingScrollPhysics(),
                         children: [
-                          // 右栏约 4 列楼栋 × 4 行，加高避免楼栋行被裁
+                          // 右栏约 7 列楼栋 × 3 行，留够高度避免楼栋行被裁
                           Container(
                             width: 1.sw - 60.w,
-                            height: 640.h,
+                            height: 500.h,
                             child: MainPageStudyRoomWidget(),
                           ),
                           Container(
