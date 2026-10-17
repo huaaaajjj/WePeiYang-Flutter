@@ -83,6 +83,14 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
   /// 平板左右分栏：右栏当前选中的帖子（null = 未选择显示占位）
   final ValueNotifier<Post?> _splitPost = ValueNotifier<Post?>(null);
 
+  /// 右栏正在展示帖子时先收起（回到占位提示）并返回 true，供返回键第一下使用；
+  /// 右栏为空返回 false，让外层按原逻辑处理（回首页/双击退出）。
+  bool closeSplitPostIfAny() {
+    if (_splitPost.value == null) return false;
+    _splitPost.value = null;
+    return true;
+  }
+
   bool initializeRefresh = false;
 
   bool showFBDropdown = false;
