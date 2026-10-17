@@ -166,7 +166,9 @@ class _NewPostPageState extends State<NewPostPage> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: ((MediaQuery.of(context).size.width - 788) / 2)
+                          .clamp(20.w, double.infinity)),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -990,7 +992,16 @@ class _TitleInputFieldState extends State<TitleInputField> {
     );
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 5, 20, 0),
+      // 平板大屏：标题与表单同宽居中（手机端边距不变）
+      margin: EdgeInsets.fromLTRB(
+          ((MediaQuery.of(context).size.width - 788) / 2)
+                  .clamp(0.0, double.infinity) +
+              20,
+          5,
+          ((MediaQuery.of(context).size.width - 788) / 2)
+                  .clamp(0.0, double.infinity) +
+              20,
+          0),
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 14),
       child: Column(
         children: [

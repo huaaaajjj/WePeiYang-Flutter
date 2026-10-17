@@ -724,7 +724,8 @@ class _PostDetailPageState extends State<PostDetailPage>
 
   Widget _buildLoadedCommentList() {
     final contentList = ListView.builder(
-      itemBuilder: _buildCommentCard,
+      itemBuilder: (context, i) =>
+          _readingColumn(_buildCommentCard(context, i)),
       controller: _controller,
       itemCount: _showPostCard
           ? _officialCommentList.length + _commentList.length + 1
@@ -764,6 +765,12 @@ class _PostDetailPageState extends State<PostDetailPage>
       child: listener,
     );
   }
+
+  /// 平板大屏：正文与评论收进居中阅读栏（与论坛流/我的页同为 788dp，手机端不受影响）
+  Widget _readingColumn(Widget child) => Center(
+        child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 788.0), child: child),
+      );
 
   Widget _buildPageContent() {
     final Widget content = switch (status) {
@@ -898,14 +905,14 @@ class _PostDetailPageState extends State<PostDetailPage>
     return ListView(
       physics: NeverScrollableScrollPhysics(),
       children: [
-        PostCardNormal(
+        _readingColumn(PostCardNormal(
           widget.post,
           outer: false,
-        ),
+        )),
         SizedBox(height: SplitUtil.h * 10),
-        _buildSortSelection(context),
+        _readingColumn(_buildSortSelection(context)),
         SizedBox(height: 10), //t
-        for (int i = 0; i < 5; i++) PostSkeleton(),
+        for (int i = 0; i < 5; i++) _readingColumn(PostSkeleton()),
       ],
     );
   }
@@ -964,7 +971,9 @@ class _PostDetailPageState extends State<PostDetailPage>
                 ids.isNotEmpty && ids.every(screenshotList.list.contains);
             final theme = WpyTheme.of(context);
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              padding: EdgeInsets.symmetric(
+                  horizontal: ((MediaQuery.of(context).size.width - 788) / 2)
+                      .clamp(12.w, double.infinity)),
               child: Row(
                 children: [
                   Text(
@@ -1332,6 +1341,11 @@ class _PostDetailPageState extends State<PostDetailPage>
             return Padding(
               padding: EdgeInsets.only(
                 bottom: keyboardInset,
+                // 平板大屏：回复栏内容与阅读栏对齐（手机端归零不受影响）
+                left: ((MediaQuery.of(context).size.width - 788) / 2)
+                    .clamp(0.0, double.infinity),
+                right: ((MediaQuery.of(context).size.width - 788) / 2)
+                    .clamp(0.0, double.infinity),
               ),
               child: AnimatedSize(
                 clipBehavior: Clip.antiAlias,
