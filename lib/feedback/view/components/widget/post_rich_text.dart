@@ -6,6 +6,8 @@ import 'package:we_pei_yang_flutter/feedback/network/post.dart';
 import 'package:we_pei_yang_flutter/feedback/view/person_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_result_page.dart';
 
+import '../../post_split.dart';
+
 /// 把 @uid:123 里的 uid 解析成昵称的缓存。
 ///
 /// 当前后端没有「按 uid 查昵称」的公开接口（posts/user 属于 b 端、需管理员权限，
@@ -165,15 +167,18 @@ class PostRichText {
     final t = tag.startsWith('#') ? tag.substring(1) : tag;
     if (t.isEmpty) return;
     final nav = Navigator.of(context);
+    // 平板分栏宿主：结果页开进左栏（在信息流/内嵌详情里点 #话题# 不压全屏）
+    final split = PostSplitScope.maybeOf(context);
 
-    void byTag(int id) => nav.pushNamed(
-          FeedbackRouter.searchResult,
-          arguments: SearchResultPageArgs('', '$id', '', '标签 #$t', 0, 0),
-        );
-    void byText() => nav.pushNamed(
-          FeedbackRouter.searchResult,
-          arguments: SearchResultPageArgs(t, '', '', '模糊搜索#$t', 2, 0),
-        );
+    void open(SearchResultPageArgs args) {
+      if (!(split?.openResults(args) ?? false)) {
+        nav.pushNamed(FeedbackRouter.searchResult, arguments: args);
+      }
+    }
+
+    void byTag(int id) =>
+        open(SearchResultPageArgs('', '$id', '', '标签 #$t', 0, 0));
+    void byText() => open(SearchResultPageArgs(t, '', '', '模糊搜索#$t', 2, 0));
 
     FeedbackService.searchTags(
       name: t,

@@ -7,6 +7,7 @@ import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/commons/util/toast_provider.dart';
 import 'package:we_pei_yang_flutter/feedback/feedback_router.dart';
 import 'package:we_pei_yang_flutter/feedback/network/feedback_service.dart';
+import 'package:we_pei_yang_flutter/feedback/network/post.dart';
 import 'package:we_pei_yang_flutter/feedback/util/post_search_util.dart';
 import 'package:we_pei_yang_flutter/feedback/view/components/widget/search_bar.dart'
     as wpySearchBar;
@@ -16,6 +17,20 @@ import '../../commons/themes/wpy_theme.dart';
 import '../../commons/widgets/w_button.dart';
 
 class SearchPage extends StatefulWidget {
+  /// 平板分栏内嵌模式：不压路由，退出/开结果页/开帖都走宿主回调
+  final bool embedded;
+  final VoidCallback? onExit;
+  final bool Function(SearchResultPageArgs args)? onOpenResults;
+  final void Function(Post post)? onOpenPost;
+
+  const SearchPage({
+    super.key,
+    this.embedded = false,
+    this.onExit,
+    this.onOpenResults,
+    this.onOpenPost,
+  });
+
   @override
   State<StatefulWidget> createState() => _SearchPageState();
 }
@@ -70,11 +85,16 @@ class _SearchPageState extends State<SearchPage> {
           if (!fromHistory) {
             _searchHistoryList.unequalAdd(normalizePostSearchKeyword(keyword)!);
           }
-          Navigator.popAndPushNamed(
-            context,
-            FeedbackRouter.detail,
-            arguments: post,
-          );
+          if (widget.embedded) {
+            // 平板分栏：帖子直接进右栏
+            widget.onOpenPost?.call(post);
+          } else {
+            Navigator.popAndPushNamed(
+              context,
+              FeedbackRouter.detail,
+              arguments: post,
+            );
+          }
         },
         onFailure: (e) {
           ToastProvider.error('无法找到对应帖子，报错信息：${e.error}');
@@ -84,11 +104,16 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     if (!fromHistory) _searchHistoryList.unequalAdd(keyword);
-    Navigator.pushNamed(
-      context,
-      FeedbackRouter.searchResult,
-      arguments: SearchResultPageArgs(keyword, '', '', '搜索结果', 0, 0),
-    );
+    if (widget.embedded) {
+      widget.onOpenResults
+          ?.call(SearchResultPageArgs(keyword, '', '', '搜索结果', 0, 0));
+    } else {
+      Navigator.pushNamed(
+        context,
+        FeedbackRouter.searchResult,
+        arguments: SearchResultPageArgs(keyword, '', '', '搜索结果', 0, 0),
+      );
+    }
   }
 
   @override
@@ -104,6 +129,8 @@ class _SearchPageState extends State<SearchPage> {
       onSubmitted: (text) {
         _openKeyword(text, fromHistory: false);
       },
+      // 平板分栏内嵌时，SearchBar 内部的 tag/推荐结果页也交给宿主开进左栏
+      onOpenResults: widget.onOpenResults,
     );
 
     var topView = SafeArea(
@@ -120,7 +147,13 @@ class _SearchPageState extends State<SearchPage> {
                   color: WpyTheme.of(context).get(WpyColorKey.labelTextColor),
                 ),
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                if (widget.embedded) {
+                  widget.onExit?.call();
+                } else {
+                  Navigator.pop(context);
+                }
+              },
             ),
           ],
         ));

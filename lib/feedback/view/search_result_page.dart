@@ -19,7 +19,14 @@ import 'new_post_page.dart';
 class SearchResultPage extends StatefulWidget {
   final SearchResultPageArgs args;
 
-  SearchResultPage(this.args);
+  /// 平板分栏内嵌模式：不压路由，返回/帖子跳转都走宿主回调
+  final bool embedded;
+  final VoidCallback? onExit;
+  final void Function(Post post)? onOpenPost;
+
+  SearchResultPage(this.args,
+      {Key? key, this.embedded = false, this.onExit, this.onOpenPost})
+      : super(key: key);
 
   @override
   _SearchResultPageState createState() => _SearchResultPageState(args.keyword,
@@ -82,11 +89,16 @@ class _SearchResultPageState extends State<SearchResultPage> {
         id: postId,
         onResult: (post) {
           if (!mounted) return;
-          Navigator.pushNamed(
-            context,
-            FeedbackRouter.detail,
-            arguments: post,
-          );
+          if (widget.embedded) {
+            // 平板分栏：帖子直接进右栏
+            widget.onOpenPost?.call(post);
+          } else {
+            Navigator.pushNamed(
+              context,
+              FeedbackRouter.detail,
+              arguments: post,
+            );
+          }
         },
         onFailure: (e) {
           ToastProvider.error('无法找到对应帖子，报错信息：${e.error}');
@@ -223,7 +235,11 @@ class _SearchResultPageState extends State<SearchResultPage> {
             color: WpyTheme.of(context).get(WpyColorKey.defaultActionColor),
           ),
           onPressed: () {
-            Navigator.pop(context, true);
+            if (widget.embedded) {
+              widget.onExit?.call();
+            } else {
+              Navigator.pop(context, true);
+            }
           },
         ),
         title: _canEditKeyword
@@ -379,6 +395,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
       canPop: true,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
+        // 分栏内嵌：返回统一交外层主页分层处理（先收右栏、再逐层退出搜索）；
+        // 这里绝不能 pop——会把整个主页路由弹掉（黑屏/跌回启动页）。
+        if (widget.embedded) return;
         Navigator.pop(context, true);
       },
       child: GestureDetector(
@@ -394,11 +413,13 @@ class _SearchResultPageState extends State<SearchResultPage> {
               duration: Duration(milliseconds: 500),
               child: body,
             )))),
-        onHorizontalDragUpdate: (DragUpdateDetails details) {
-          if (details.delta.dx > 20) {
-            Navigator.pop(context, true);
-          }
-        },
+        onHorizontalDragUpdate: widget.embedded
+            ? null
+            : (DragUpdateDetails details) {
+                if (details.delta.dx > 20) {
+                  Navigator.pop(context, true);
+                }
+              },
       ),
     );
   }

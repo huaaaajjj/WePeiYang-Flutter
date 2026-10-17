@@ -260,10 +260,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             // 重置最后一次显示对话框的时间
             CommonPreferences.lastActivityDialogShownDate.value = "";
 
-            // 海棠分栏里正打开着帖子：第一下返回先收起右栏（回到占位提示），
-            // 不切换标签；右栏为空时才按原逻辑处理（回首页/双击退出）。
+            // 海棠分栏分层返回：右栏有帖先收起；内嵌搜索页/结果页逐层退回左栏；
+            // 都为空时才按原逻辑处理（回首页/双击退出）。
             if (_tabController.index == 1 &&
-                (feedbackKey.currentState?.closeSplitPostIfAny() ?? false)) {
+                (feedbackKey.currentState?.handleBack() ?? false)) {
               return;
             }
 

@@ -9,6 +9,7 @@ import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/feedback/view/lake_home_page/lake_notifier.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_result_page.dart';
 
+import '../../post_split.dart';
 import '../../../../commons/widgets/w_button.dart';
 
 /// 北洋热搜
@@ -77,17 +78,25 @@ class _HotCardState extends State<HotCard> {
                                         ? data.hotTagsList.length
                                         : 5,
                                     (index) => WButton(
-                                          onPressed: () => Navigator.pushNamed(
-                                            context,
-                                            FeedbackRouter.searchResult,
-                                            arguments: SearchResultPageArgs(
+                                          onPressed: () {
+                                            final args = SearchResultPageArgs(
                                                 '',
                                                 '${data.hotTagsList[index].tagId}',
                                                 '',
                                                 '热搜：${data.hotTagsList[index].name}\n点击标签参加话题讨论',
                                                 0,
-                                                0),
-                                          ),
+                                                0);
+                                            // 平板分栏：结果页开进左栏；否则照常压路由
+                                            if (!(PostSplitScope.maybeOf(context)
+                                                    ?.openResults(args) ??
+                                                false)) {
+                                              Navigator.pushNamed(
+                                                context,
+                                                FeedbackRouter.searchResult,
+                                                arguments: args,
+                                              );
+                                            }
+                                          },
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
                                                 vertical: 3.h),

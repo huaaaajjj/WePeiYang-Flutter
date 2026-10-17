@@ -24,7 +24,12 @@ typedef ChangeCallback = void Function(String);
 class SearchBar extends StatefulWidget {
   final SubmitCallback onSubmitted;
 
-  const SearchBar({Key? key, required this.onSubmitted}) : super(key: key);
+  /// 非空时：tag/推荐结果页交给宿主内嵌打开（平板分栏）并返回 true；
+  /// 为空或返回 false 时调用方照常压路由。
+  final bool Function(SearchResultPageArgs args)? onOpenResults;
+
+  const SearchBar({Key? key, required this.onSubmitted, this.onOpenResults})
+      : super(key: key);
 
   @override
   _SearchBarState createState() => _SearchBarState();
@@ -66,12 +71,16 @@ class _SearchBarState extends State<SearchBar>
       tagList.add(WButton(
         onPressed: () {
           _controller.text = tagUtil[total].name;
-          Navigator.pushNamed(
-            context,
-            FeedbackRouter.searchResult,
-            arguments: SearchResultPageArgs('', '${tagUtil[total].id}', '',
-                '搜索结果 #${tagUtil[total].name}', 0, 0),
-          );
+          final args = SearchResultPageArgs('', '${tagUtil[total].id}', '',
+              '搜索结果 #${tagUtil[total].name}', 0, 0);
+          // 平板分栏：结果页开进左栏；否则照常压路由
+          if (!(widget.onOpenResults?.call(args) ?? false)) {
+            Navigator.pushNamed(
+              context,
+              FeedbackRouter.searchResult,
+              arguments: args,
+            );
+          }
         },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 20, 4),
@@ -172,17 +181,21 @@ class _SearchBarState extends State<SearchBar>
                       if (keyword.isNotEmpty) {
                         widget.onSubmitted.call(keyword);
                       } else {
-                        Navigator.pushNamed(
-                          context,
-                          FeedbackRouter.searchResult,
-                          arguments: SearchResultPageArgs(
-                              '',
-                              '${data.recTag?.tagId}',
-                              '',
-                              '推荐：#${data.recTag?.name}',
-                              0,
-                              0),
-                        );
+                        final args = SearchResultPageArgs(
+                            '',
+                            '${data.recTag?.tagId}',
+                            '',
+                            '推荐：#${data.recTag?.name}',
+                            0,
+                            0);
+                        // 平板分栏：结果页开进左栏；否则照常压路由
+                        if (!(widget.onOpenResults?.call(args) ?? false)) {
+                          Navigator.pushNamed(
+                            context,
+                            FeedbackRouter.searchResult,
+                            arguments: args,
+                          );
+                        }
                       }
                     },
                     textInputAction: TextInputAction.search,

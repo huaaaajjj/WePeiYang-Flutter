@@ -22,6 +22,7 @@ import 'package:we_pei_yang_flutter/feedback/view/lake_home_page/normal_sub_page
 import 'package:we_pei_yang_flutter/feedback/view/new_post_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/post_detail_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/post_split.dart';
+import 'package:we_pei_yang_flutter/feedback/view/search_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_result_page.dart';
 import 'package:we_pei_yang_flutter/message/feedback_message_page.dart';
 import 'package:we_pei_yang_flutter/commons/themes/template/wpy_theme_data.dart';
@@ -83,13 +84,55 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
   /// 平板左右分栏：右栏当前选中的帖子（null = 未选择显示占位）
   final ValueNotifier<Post?> _splitPost = ValueNotifier<Post?>(null);
 
-  /// 右栏正在展示帖子时先收起（回到占位提示）并返回 true，供返回键第一下使用；
-  /// 右栏为空返回 false，让外层按原逻辑处理（回首页/双击退出）。
-  bool closeSplitPostIfAny() {
-    if (_splitPost.value == null) return false;
-    _splitPost.value = null;
+  /// 平板左右分栏：左栏内容栈（空 = 信息流；非空时顶部为内嵌的搜索页/搜索结果页）
+  final List<Widget> _leftSearchStack = [];
+
+  /// 返回键分层处理：右栏有帖 → 先收起（回到占位提示）；左栏搜索栈非空 → 退一层；
+  /// 都没有 → 返回 false，让外层按原逻辑处理（回首页/双击退出）。
+  bool handleBack() {
+    if (_splitPost.value != null) {
+      _splitPost.value = null;
+      return true;
+    }
+    if (_leftSearchStack.isNotEmpty) {
+      setState(() => _leftSearchStack.removeLast());
+      return true;
+    }
+    return false;
+  }
+
+  /// 平板：搜索页开进左栏（不压路由；右栏详情保持可用）
+  void _openSearch() {
+    setState(() {
+      _leftSearchStack.add(SearchPage(
+        embedded: true,
+        onExit: _popLeftPane,
+        onOpenResults: _openSearchResults,
+        onOpenPost: _showSplitPost,
+      ));
+    });
+  }
+
+  /// 平板：搜索结果页开进左栏并返回 true；供 PostSplitScope 内各"搜索入口"复用
+  bool _openSearchResults(SearchResultPageArgs args) {
+    setState(() {
+      _leftSearchStack.add(SearchResultPage(
+        args,
+        embedded: true,
+        onExit: _popLeftPane,
+        onOpenPost: _showSplitPost,
+      ));
+    });
     return true;
   }
+
+  void _popLeftPane() {
+    if (_leftSearchStack.isEmpty) return;
+    setState(() => _leftSearchStack.removeLast());
+  }
+
+  /// 内嵌链路里打开帖子：选中到右栏（右栏有帖则直接替换）
+  void _showSplitPost(Post post) => _splitPost.value = post;
 
   bool initializeRefresh = false;
 
@@ -260,7 +303,14 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
 
   Widget _buildSearchBar() {
     return WButton(
-      onPressed: () => Navigator.pushNamed(context, FeedbackRouter.search),
+      onPressed: () {
+        // 平板分栏：搜索页开进左栏，右栏详情保持；手机端照常压路由
+        if (MediaQuery.of(context).size.shortestSide >= 600) {
+          _openSearch();
+        } else {
+          Navigator.pushNamed(context, FeedbackRouter.search);
+        }
+      },
       child: Container(
         height: searchBarHeight - 8.h,
         margin: EdgeInsets.fromLTRB(15.h, 8.h, 10.h, 0),
@@ -672,11 +722,23 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
             }),
         );
         if (MediaQuery.of(context).size.shortestSide < 600) return body;
-        // 平板：左侧列表 + 右侧内嵌帖子详情（左栏点击经 PostSplitScope 选中）
+        // 平板：左侧列表 + 右侧内嵌帖子详情（左栏点击经 PostSplitScope 选中）；
+        // 左栏可叠加内嵌搜索页/搜索结果页（不压全屏路由），IndexedStack 保住信息流状态
         return PostSplitScope(
             notifier: _splitPost,
+            onOpenResults: _openSearchResults,
             child: Row(children: [
-              Expanded(child: body),
+              Expanded(
+                  child: IndexedStack(
+                sizing: StackFit.expand,
+                index: _leftSearchStack.isEmpty ? 0 : 1,
+                children: [
+                  body,
+                  _leftSearchStack.isEmpty
+                      ? SizedBox.shrink()
+                      : _leftSearchStack.last,
+                ],
+              )),
               Container(
                   width: 1,
                   color:
@@ -802,17 +864,22 @@ class FbTagsWrapState extends State<FbTagsWrap>
                           .sp(13)),
                 ),
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    FeedbackRouter.searchResult,
-                    arguments: SearchResultPageArgs(
-                        '',
-                        '',
-                        provider.departmentList[index].id.toString(),
-                        '#${provider.departmentList[index].name}',
-                        1,
-                        0),
-                  );
+                  final args = SearchResultPageArgs(
+                      '',
+                      '',
+                      provider.departmentList[index].id.toString(),
+                      '#${provider.departmentList[index].name}',
+                      1,
+                      0);
+                  // 平板分栏：结果页开进左栏；手机端/无宿主照常压路由
+                  if (!(PostSplitScope.maybeOf(context)?.openResults(args) ??
+                      false)) {
+                    Navigator.pushNamed(
+                      context,
+                      FeedbackRouter.searchResult,
+                      arguments: args,
+                    );
+                  }
                 },
               );
             }),

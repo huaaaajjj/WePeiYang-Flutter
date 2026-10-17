@@ -8,6 +8,7 @@ import 'package:we_pei_yang_flutter/commons/widgets/wpy_pic.dart';
 import 'package:we_pei_yang_flutter/feedback/view/person_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_result_page.dart';
 
+import '../../post_split.dart';
 import '../../../../commons/preferences/common_prefs.dart';
 import '../../../../commons/themes/template/wpy_theme_data.dart';
 import '../../../../commons/themes/wpy_theme.dart';
@@ -161,30 +162,22 @@ class TagShowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        final SearchResultPageArgs args;
         if (id == -1) {
-          Navigator.pushNamed(
-            context,
-            FeedbackRouter.searchResult,
-            arguments: SearchResultPageArgs('$tag', '', '', '模糊搜索#$tag', 2, 0),
-          );
+          args = SearchResultPageArgs('$tag', '', '', '模糊搜索#$tag', 2, 0);
         } else if (type == 0) {
-          Navigator.pushNamed(
-            context,
-            FeedbackRouter.searchResult,
-            arguments: SearchResultPageArgs('', '', '', '$tag 分区详情', tar, 0),
-          );
+          args = SearchResultPageArgs('', '', '', '$tag 分区详情', tar, 0);
         } else if (type == 1) {
-          Navigator.pushNamed(
-            context,
-            FeedbackRouter.searchResult,
-            arguments: SearchResultPageArgs('', '', '$id', '部门 #$tag', 1, 0),
-          );
+          args = SearchResultPageArgs('', '', '$id', '部门 #$tag', 1, 0);
         } else {
+          args = SearchResultPageArgs('', '$id', '', '标签 #$tag', 0, lakeType);
+        }
+        // 平板分栏：结果页开进左栏；手机端/无宿主照常压路由
+        if (!(PostSplitScope.maybeOf(context)?.openResults(args) ?? false)) {
           Navigator.pushNamed(
             context,
             FeedbackRouter.searchResult,
-            arguments:
-                SearchResultPageArgs('', '$id', '', '标签 #$tag', 0, lakeType),
+            arguments: args,
           );
         }
       },
