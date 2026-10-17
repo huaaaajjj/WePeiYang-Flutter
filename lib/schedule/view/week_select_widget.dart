@@ -23,8 +23,14 @@ const double _canvasHeight = _cubeSideLength * 5 + _spacingLength * 4;
 
 /// 星期切换栏
 class WeekSelectWidget extends StatelessWidget {
+  /// 平板横屏：竖排成左侧一列（课表本身保持原样）
+  final bool vertical;
+
+  const WeekSelectWidget({Key? key, this.vertical = false}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    if (vertical) return _buildVertical(context);
     var listView = Builder(
       builder: (context) {
         var provider = context.watch<CourseProvider>();
@@ -84,6 +90,72 @@ class WeekSelectWidget extends StatelessWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: shrink ? 0 : 90.h,
+            child: shrink ? SizedBox.shrink() : listView,
+          );
+        },
+      ),
+    );
+  }
+
+  /// 平板横屏：周切换竖排为课表左侧一列（课表本身保持不变）
+  Widget _buildVertical(BuildContext context) {
+    var listView = Builder(builder: (context) {
+      var provider = context.watch<CourseProvider>();
+      var current = provider.currentWeek;
+      if (current == 1) current++;
+
+      // 单个条目约估高度（画布 + 文字 + 间距），只为把当前周滚入视野
+      double itemHeight = _canvasHeight + 50.h;
+      return ListView.builder(
+          itemCount: provider.weekCount,
+          scrollDirection: Axis.vertical,
+          padding: EdgeInsets.symmetric(vertical: 6.h),
+          controller: ScrollController(
+              initialScrollOffset: (current - 2) * itemHeight),
+          itemBuilder: (context, i) {
+            /// 为了让splash起到遮挡的效果,故而把InkWell放在Stack顶层
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.h),
+                child: Stack(
+                  children: [
+                    _getContent(provider, i),
+
+                    /// 波纹效果蒙版，加上material使inkwell能在list中显示出来
+                    SizedBox(
+                      height: _canvasHeight + 20.w,
+                      width: _canvasWidth + 25.w,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          radius: 5000,
+                          borderRadius: BorderRadius.circular(5.r),
+                          splashColor: WpyTheme.of(context)
+                              .get(WpyColorKey.primaryBackgroundColor)
+                              .withValues(alpha: 0.4),
+                          highlightColor: Colors.transparent,
+                          onTap: () => provider.selectedWeek = i + 1,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          });
+    });
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+          secondaryHeaderColor:
+              WpyTheme.of(context).get(WpyColorKey.primaryBackgroundColor)),
+      child: Builder(
+        builder: (context) {
+          var shrink =
+              context.select<CourseDisplayProvider, bool>((p) => p.shrink);
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: shrink ? 0 : _canvasWidth + 50.w,
             child: shrink ? SizedBox.shrink() : listView,
           );
         },

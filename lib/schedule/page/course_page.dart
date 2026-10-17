@@ -13,6 +13,7 @@ import 'package:we_pei_yang_flutter/commons/themes/template/wpy_theme_data.dart'
 import 'package:we_pei_yang_flutter/commons/util/router_manager.dart';
 import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/commons/widgets/schedule_background.dart';
+import 'package:we_pei_yang_flutter/feedback/util/splitscreen_util.dart';
 import 'package:we_pei_yang_flutter/gpa/view/classes_need_vpn_dialog.dart';
 import 'package:we_pei_yang_flutter/main.dart';
 import 'package:we_pei_yang_flutter/schedule/extension/logic_extension.dart';
@@ -118,6 +119,24 @@ class _CoursePageState extends State<CoursePage> {
 
   @override
   Widget build(BuildContext context) {
+    var wide = SplitUtil.useTabletLayout(context);
+    var content = SingleChildScrollView(
+      child: Screenshot(
+        controller: screenshotController,
+        child: Column(
+          children: [
+            if (!wide) _TitleWidget(),
+            if (!wide) WeekSelectWidget(),
+            Column(
+              children: [
+                CourseDetailWidget(),
+                _HoursCounterWidget(),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
     return Stack(
       children: [
         ScheduleBackground(),
@@ -132,23 +151,23 @@ class _CoursePageState extends State<CoursePage> {
             takeScreenshot: takeScreenshot,
           ),
           backgroundColor: Colors.transparent,
-          body: SingleChildScrollView(
-            child: Screenshot(
-              controller: screenshotController,
-              child: Column(
-                children: [
-                  _TitleWidget(),
-                  WeekSelectWidget(),
-                  Column(
-                    children: [
-                      CourseDetailWidget(),
-                      _HoursCounterWidget(),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // 平板横屏：标题行移到页面左上角、周切换竖排到课表左侧（课表本身保持原样）；手机/竖屏不变
+          body: wide
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _TitleWidget(),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          WeekSelectWidget(vertical: true),
+                          Expanded(child: content),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : content,
         ),
       ],
     );
