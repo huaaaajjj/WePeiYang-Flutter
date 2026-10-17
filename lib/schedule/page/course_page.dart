@@ -287,6 +287,30 @@ class _TitleWidget extends StatelessWidget {
           ),
           Builder(builder: (context) {
             var provider = context.watch<CourseDisplayProvider>();
+            Widget arrow;
+            if (SplitUtil.useTabletLayout(context)) {
+              // 平板横屏周列在左侧：箭头改为左右方向（◀收起／▶展开）
+              arrow = RotatedBox(
+                quarterTurns: provider.shrink ? 3 : 1,
+                child: Image.asset(
+                  'assets/images/schedule/down.png',
+                  color: WpyTheme.of(context)
+                      .get(WpyColorKey.primaryBackgroundColor),
+                  height: 18.r,
+                  width: 18.r,
+                ),
+              );
+            } else {
+              arrow = Image.asset(
+                provider.shrink
+                    ? 'assets/images/schedule/up.png'
+                    : 'assets/images/schedule/down.png',
+                color: WpyTheme.of(context)
+                    .get(WpyColorKey.primaryBackgroundColor),
+                height: 18.r,
+                width: 18.r,
+              );
+            }
             return WButton(
                 onPressed: () {
                   provider.shrink = !provider.shrink;
@@ -294,15 +318,7 @@ class _TitleWidget extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(),
                   padding: EdgeInsets.fromLTRB(8.w, 5.h, 8.w, 0),
-                  child: Image.asset(
-                    provider.shrink
-                        ? 'assets/images/schedule/up.png'
-                        : 'assets/images/schedule/down.png',
-                    color: WpyTheme.of(context)
-                        .get(WpyColorKey.primaryBackgroundColor),
-                    height: 18.r,
-                    width: 18.r,
-                  ),
+                  child: arrow,
                 ));
           })
         ],
