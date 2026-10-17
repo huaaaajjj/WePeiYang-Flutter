@@ -192,6 +192,18 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                               curve: Curves.easeIn,
                               margin: EdgeInsets.only(top: 20.h),
                               padding: EdgeInsets.only(top: 40.h),
+                              // 平板大屏：内容不足一屏时白色底板补到屏底，
+                              // 避免下方露出底层渐变（蓝色空白）
+                              constraints: MediaQuery.of(context)
+                                          .size
+                                          .shortestSide >=
+                                      600
+                                  ? BoxConstraints(
+                                      minHeight: MediaQuery.of(context)
+                                              .size
+                                              .height -
+                                          120.h)
+                                  : null,
                               decoration: BoxDecoration(
                                   color: WpyTheme.of(context)
                                       .get(WpyColorKey.primaryBackgroundColor),
@@ -251,7 +263,7 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
       );
 
   Widget _functionCardsView() {
-    // 平板大屏：左栏工具卡竖排 + 右栏 Study Room/GPA/Exam（手机端保持原样）
+    // 平板大屏：左栏工具卡两列网格 + 右栏 Study Room/GPA/Exam（手机端保持原样）
     if (MediaQuery.of(context).size.shortestSide >= 600) {
       return _functionCardsViewWide();
     }
@@ -327,7 +339,8 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  /// 平板大屏：左栏 = 工具卡竖排（仍可拖拽排序）；右栏 = Study Room / GPA / Exam
+  /// 平板大屏：左栏 = 工具卡两列网格（排序走"工具栏管理"页）；右栏 = Study Room /
+  /// GPA / Exam；地图·校历预览在两栏下方
   Widget _functionCardsViewWide() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,9 +350,10 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
           children: [
             SizedBox(
               width: 400,
+              // 左栏：工具卡两列网格（同一套卡片，网格间距留白；排序走工具栏管理页）
               child: SliverCardsWidget(
                 CommonPreferences.displayedTool.value,
-                axis: Axis.vertical,
+                gridCount: 2,
               ),
             ),
             SizedBox(width: 32),
@@ -416,9 +430,9 @@ class SliverCardsWidget extends StatelessWidget {
   final List<CardBean> cards;
   final List<int> order;
 
-  /// 平板左栏为竖排（Axis.vertical），手机端保持横排
-  final Axis axis;
-  final ScrollController controller = ScrollController();
+  /// 平板左栏两列网格模式（>1 生效：按列数排成网格、不随内容滚动，
+  /// 由网格间距留白）；手机端保持 0 = 原横排可拖拽列表
+  final int gridCount;
   static List<String> peiyangLabel = [
     '课程表',
     '入校码',
@@ -430,49 +444,36 @@ class SliverCardsWidget extends StatelessWidget {
     // '失物招领'
   ];
 
-  SliverCardsWidget(this.cards, {this.axis = Axis.horizontal})
+  SliverCardsWidget(this.cards, {this.gridCount = 0})
       : order = CommonPreferences.sanitizedDisplayOrder();
 
   @override
   Widget build(BuildContext context) {
-    final vertical = axis == Axis.vertical;
+    // 平板两列网格：与横排列表同一套卡片，网格自带间距、不滚动
+    if (gridCount > 1) {
+      return GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: gridCount,
+        crossAxisSpacing: 18,
+        mainAxisSpacing: 14,
+        childAspectRatio: 1.7,
+        padding: EdgeInsets.symmetric(horizontal: 12.h),
+        children: [
+          for (var i = 0; i < order.length; i++) _buildItem(context, i),
+        ],
+      );
+    }
     Widget cardList = ReorderableListView.builder(
       proxyDecorator: (Widget child, int index, Animation<double> animation) {
         return child;
       },
-      scrollDirection: axis,
+      scrollDirection: Axis.horizontal,
       padding: EdgeInsets.only(left: 16.h),
-      // 竖排时整列一次排完（高度按卡片数给定），禁用内部滚动避免与页面抢手势
-      physics: vertical
-          ? const NeverScrollableScrollPhysics()
-          : const BouncingScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       clipBehavior: Clip.none,
       itemCount: order.length,
-      itemBuilder: (context, i) {
-        final cardBean = cards[order[i]];
-        if (!peiyangLabel.contains(cardBean.label)) {
-          return WButton(
-            key: ValueKey(cardBean.route),
-            onPressed: () async {
-              if (await canLaunchUrl(Uri.parse(cardBean.route))) {
-                await launchUrl(Uri.parse(cardBean.route),
-                    mode: LaunchMode.externalApplication);
-              } else {
-                ToastProvider.error('请检查网络状态');
-              }
-            },
-            child: generateCard(context, cardBean),
-          );
-        } else {
-          return WButton(
-            key: ValueKey(cardBean.route),
-            onPressed: () {
-              Navigator.pushNamed(context, cardBean.route);
-            },
-            child: generateCard(context, cardBean),
-          );
-        }
-      },
+      itemBuilder: (context, i) => _buildItem(context, i),
       onReorderItem: (int oldIndex, int newIndex) {
         final int movedIndex = order.removeAt(oldIndex);
         order.insert(newIndex, movedIndex);
@@ -482,18 +483,48 @@ class SliverCardsWidget extends StatelessWidget {
     );
 
     return SizedBox(
-      // 竖排（平板左栏）按卡片数取高；横排（手机）保持 100.h 原样
-      height: vertical ? order.length * 98.h : 100.h,
+      height: 100.h,
       width: double.infinity,
       child: cardList,
     );
   }
 
+  Widget _buildItem(BuildContext context, int i) {
+    final cardBean = cards[order[i]];
+    if (!peiyangLabel.contains(cardBean.label)) {
+      return WButton(
+        key: ValueKey(cardBean.route),
+        onPressed: () async {
+          if (await canLaunchUrl(Uri.parse(cardBean.route))) {
+            await launchUrl(Uri.parse(cardBean.route),
+                mode: LaunchMode.externalApplication);
+          } else {
+            ToastProvider.error('请检查网络状态');
+          }
+        },
+        child: generateCard(context, cardBean),
+      );
+    } else {
+      return WButton(
+        key: ValueKey(cardBean.route),
+        onPressed: () {
+          Navigator.pushNamed(context, cardBean.route);
+        },
+        child: generateCard(context, cardBean),
+      );
+    }
+  }
+
   Widget generateCard(BuildContext context, CardBean bean) {
+    final gridded = gridCount > 1;
     return Container(
-      width: 150.w,
-      height: 80.h,
-      margin: EdgeInsets.fromLTRB(0, 2.h, 18.h, 16.h),
+      // 网格模式：撑满单元格（WButton 内部会把约束放宽，用 infinity 顶回单元格尺寸）
+      width: gridded ? double.infinity : 150.w,
+      height: gridded ? double.infinity : 80.h,
+      // 网格模式由网格间距负责留白，卡片自身不再带外边距
+      margin: gridded
+          ? EdgeInsets.zero
+          : EdgeInsets.fromLTRB(0, 2.h, 18.h, 16.h),
       decoration: MapAndCalenderState().cardDecoration(context),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
