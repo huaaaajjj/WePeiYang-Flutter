@@ -53,7 +53,11 @@ class _FloorsView extends StatelessWidget {
     final _session = context.watch<TimeProvider>().session;
     final _date = context.watch<TimeProvider>().date;
     initRooms(_session, _date);
-    return ListView(
+    // 平板大屏：内容收进居中 788 窄栏（手机端宽度小于该值不受影响）
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 788.0),
+        child: ListView(
       children: [
         Padding(
           padding: EdgeInsets.fromLTRB(0, 20.h, 0, 50.h),
@@ -109,6 +113,8 @@ class _FloorsView extends StatelessWidget {
           ),
         ),
       ],
+        ),
+      ),
     );
   }
 }
@@ -151,11 +157,13 @@ class FloorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final areaName = RegExp(r'\d$').hasMatch(name) ? '$name层' : name;
-    // 平板大屏：每行房间数随宽度自适应（手机保持 4 个/行）；
-    // 83.w 为单个房间格（67.w + 左右 8.w 间距）的步进宽度
-    final perRow =
-        ((MediaQuery.of(context).size.width - 50.w) / 83.w).floor().clamp(4, 12);
-    final roomsGridView = Column(
+    return LayoutBuilder(builder: (context, constraints) {
+      // 平板大屏：每行房间数按当前可用宽度自适应（手机保持 4 个/行；
+      // 收进 788 窄栏后按栏宽算）；83.w 为单个房间格
+      // （67.w + 左右 8.w 间距）的步进宽度
+      final perRow =
+          (constraints.maxWidth / 83.w).floor().clamp(4, 12);
+      final roomsGridView = Column(
       children: [
         for (int i = 0; i < rooms.length; i += perRow)
           Row(
@@ -199,6 +207,7 @@ class FloorWidget extends StatelessWidget {
         SizedBox(height: 16.w),
       ],
     );
+    });
   }
 }
 
