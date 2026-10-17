@@ -392,15 +392,15 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                       ]),
                   ),
                   SizedBox(
-                    height: 500.h,
+                    height: 640.h,
                     child: TabBarView(
                         controller: _tc,
                         physics: BouncingScrollPhysics(),
                         children: [
-                          // 右栏约 7 列楼栋 × 3 行，留够高度避免楼栋行被裁
+                          // 右栏约 7 列楼栋 × 4 行（卫津路约 27 个），留够高度避免行被裁
                           Container(
                             width: 1.sw - 60.w,
-                            height: 500.h,
+                            height: 640.h,
                             child: MainPageStudyRoomWidget(),
                           ),
                           Container(
