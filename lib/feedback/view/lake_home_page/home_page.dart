@@ -323,17 +323,21 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
             SizedBox(height: MediaQuery.of(context).padding.top),
             Column(
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(width: 0.9.sw, child: _buildSearchBar()),
-                    _buildMessageButton()
-                  ],
-                ),
+                LayoutBuilder(builder: (context, rowLayout) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                          width: rowLayout.maxWidth * 0.9,
+                          child: _buildSearchBar()),
+                      _buildMessageButton()
+                    ],
+                  );
+                }),
                 SizedBox(height: 16),
                 SizedBox(
                   height: tabBarHeight - 14,
-                  width: 1.sw,
+                  width: double.infinity,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -526,16 +530,21 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
                     valueListenable: LakeUtil.showSearch,
                     child: Column(
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(width: 0.9.sw, child: _buildSearchBar()),
-                            _buildMessageButton()
-                          ],
-                        ),
+                        LayoutBuilder(builder: (context, rowLayout) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // 按当前栏宽取 90%（分栏内也正确：整屏时与 0.9.sw 一致）
+                              Container(
+                                  width: rowLayout.maxWidth * 0.9,
+                                  child: _buildSearchBar()),
+                              _buildMessageButton()
+                            ],
+                          );
+                        }),
                         SizedBox(
                           height: tabBarHeight,
-                          width: 1.sw,
+                          width: double.infinity,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
