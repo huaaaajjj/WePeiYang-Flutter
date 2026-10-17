@@ -186,7 +186,7 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                       child: ListView(
                         controller: _sc,
                         children: <Widget>[
-                          TodayCoursesWidget(),
+                          _readingColumn(TodayCoursesWidget()),
                           AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeIn,
@@ -198,13 +198,14 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                                   borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(40.r),
                                       topRight: Radius.circular(40.r))),
-                              child: _functionCardsView()),
+                              // 平板大屏：内容收进居中窄栏，白色底板仍通栏
+                              child: _readingColumn(_functionCardsView())),
                         ],
                       ),
                     ),
                   ),
                 ),
-                Container(
+                _readingColumn(Container(
                   height: 60.h,
                   margin: EdgeInsets.only(left: 30.w, top: 10.h),
                   alignment: Alignment.centerLeft,
@@ -228,7 +229,7 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                           ),
                         );
                       }),
-                ),
+                )),
               ],
             ),
           ),
@@ -236,6 +237,17 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
       ),
     );
   }
+
+  /// 平板大屏：首页内容收进居中窄栏（与其他页面一致的 788 阅读栏；
+  /// 手机端宽度小于该值时无任何影响）。渐变/白色底板仍保持通栏。
+  /// 用 Align.topCenter 而非 Center：HELLO 那层在 Stack 里，Center 会把它纵向居中。
+  Widget _readingColumn(Widget child) => Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 788.0),
+          child: child,
+        ),
+      );
 
   Widget _functionCardsView() {
     return Column(
@@ -291,7 +303,10 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                 // ),
                 Container(
                   width: 1.sw - 60.w,
-                  height: 300.h,
+                  // 平板窄栏下自习室楼栋网格约 8 列 × 2 行，加高避免第二行被裁
+                  height: MediaQuery.of(context).size.shortestSide >= 600
+                      ? 400.h
+                      : 300.h,
                   child: MainPageStudyRoomWidget(),
                 ),
                 Container(

@@ -84,7 +84,13 @@ class MapAndCalenderState extends State<MapAndCalender> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    // 平板大屏：卡片按当前栏宽取宽（收进首页居中窄栏后仍两张并排；
+    // 手机端 box.maxWidth 即屏宽，与原 1.sw 算法数值一致）
+    return LayoutBuilder(builder: (context, box) {
+      final cardWidth = ((box.maxWidth - 60.h) / 2)
+          .clamp(250.h, double.infinity)
+          .toDouble();
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
         padding: EdgeInsets.only(left: 28.w),
         child: Text(
@@ -111,7 +117,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
+                      width: cardWidth,
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -156,7 +162,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
+                      width: cardWidth,
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -217,7 +223,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
+                      width: cardWidth,
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -260,7 +266,7 @@ class MapAndCalenderState extends State<MapAndCalender> {
               child: Stack(
                 children: [
                   Container(
-                      width: ((1.sw - 60.h) / 2).clamp(250.h, double.infinity).toDouble(),
+                      width: cardWidth,
                       height: 100.h,
                       margin: EdgeInsets.fromLTRB(0, 10.h, 18.h, 16.h),
                       decoration: cardDecoration(context).copyWith(
@@ -295,5 +301,6 @@ class MapAndCalenderState extends State<MapAndCalender> {
         ),
       ),
     ]);
+    });
   }
 }
