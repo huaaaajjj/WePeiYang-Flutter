@@ -13,6 +13,7 @@ import 'package:we_pei_yang_flutter/commons/util/toast_provider.dart';
 import 'package:we_pei_yang_flutter/feedback/feedback_router.dart';
 import 'package:we_pei_yang_flutter/feedback/network/feedback_service.dart';
 import 'package:we_pei_yang_flutter/feedback/network/post.dart';
+import 'package:we_pei_yang_flutter/feedback/view/post_split.dart';
 import 'package:we_pei_yang_flutter/feedback/util/splitscreen_util.dart';
 import 'package:we_pei_yang_flutter/feedback/view/components/widget/icon_widget.dart';
 import 'package:we_pei_yang_flutter/feedback/view/components/widget/long_text_shower.dart';
@@ -252,11 +253,17 @@ class _PostCardNormalState extends State<PostCardNormal> {
           if (widget.outer) {
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  FeedbackRouter.detail,
-                  arguments: post,
-                );
+                final split = PostSplitScope.maybeOf(context);
+                if (split != null) {
+                  // 平板分栏：选中到右栏内嵌展示
+                  split.select(post);
+                } else {
+                  Navigator.pushNamed(
+                    context,
+                    FeedbackRouter.detail,
+                    arguments: post,
+                  );
+                }
               },
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12.h),

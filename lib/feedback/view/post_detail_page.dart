@@ -29,6 +29,7 @@ import 'package:we_pei_yang_flutter/feedback/network/post.dart';
 import 'package:we_pei_yang_flutter/feedback/util/splitscreen_util.dart';
 import 'package:we_pei_yang_flutter/feedback/view/components/normal_comment_card.dart';
 import 'package:we_pei_yang_flutter/feedback/view/components/widget/masked_rich_text.dart';
+import 'package:we_pei_yang_flutter/feedback/view/post_split.dart';
 import 'package:we_pei_yang_flutter/feedback/view/image_view/local_image_view_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/lake_home_page/normal_sub_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/report_question_page.dart';
@@ -840,7 +841,15 @@ class _PostDetailPageState extends State<PostDetailPage>
           (widget.split ?? false) ? Icons.clear : Icons.arrow_back,
           color: WpyTheme.of(context).get(WpyColorKey.labelTextColor),
         ),
-        onPressed: () => Navigator.pop(context, widget.post),
+        onPressed: () {
+          final splitScope = PostSplitScope.maybeOf(context);
+          if ((widget.split ?? false) && splitScope != null) {
+            // 分栏模式：仅清空右栏选择，不退出页面
+            splitScope.clear();
+          } else {
+            Navigator.pop(context, widget.post);
+          }
+        },
       ),
       actions: [
         if (hasAdmin) _adminButton(context),
@@ -876,13 +885,7 @@ class _PostDetailPageState extends State<PostDetailPage>
         },
         child: GestureDetector(
           child: Padding(
-            padding: widget.split ?? false
-                ? EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top <
-                            widget.searchBarHeight
-                        ? widget.searchBarHeight
-                        : MediaQuery.of(context).padding.top)
-                : EdgeInsets.zero,
+            padding: EdgeInsets.zero,
             child: Scaffold(
               resizeToAvoidBottomInset: false,
               backgroundColor:
@@ -891,11 +894,13 @@ class _PostDetailPageState extends State<PostDetailPage>
               body: _buildPageContent(),
             ),
           ),
-          onHorizontalDragUpdate: (DragUpdateDetails details) {
-            if (details.delta.dx > 20) {
-              Navigator.pop(context, widget.post);
-            }
-          },
+          onHorizontalDragUpdate: (widget.split ?? false)
+              ? null
+              : (DragUpdateDetails details) {
+                  if (details.delta.dx > 20) {
+                    Navigator.pop(context, widget.post);
+                  }
+                },
         ),
       ),
     );
@@ -971,9 +976,7 @@ class _PostDetailPageState extends State<PostDetailPage>
                 ids.isNotEmpty && ids.every(screenshotList.list.contains);
             final theme = WpyTheme.of(context);
             return Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: ((MediaQuery.of(context).size.width - 788) / 2)
-                      .clamp(12.w, double.infinity)),
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
               child: Row(
                 children: [
                   Text(
@@ -1341,11 +1344,6 @@ class _PostDetailPageState extends State<PostDetailPage>
             return Padding(
               padding: EdgeInsets.only(
                 bottom: keyboardInset,
-                // 平板大屏：回复栏内容与阅读栏对齐（手机端归零不受影响）
-                left: ((MediaQuery.of(context).size.width - 788) / 2)
-                    .clamp(0.0, double.infinity),
-                right: ((MediaQuery.of(context).size.width - 788) / 2)
-                    .clamp(0.0, double.infinity),
               ),
               child: AnimatedSize(
                 clipBehavior: Clip.antiAlias,

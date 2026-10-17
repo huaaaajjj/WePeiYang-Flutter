@@ -20,6 +20,8 @@ import 'package:we_pei_yang_flutter/feedback/view/components/widget/tab.dart';
 import 'package:we_pei_yang_flutter/feedback/view/lake_home_page/lake_notifier.dart';
 import 'package:we_pei_yang_flutter/feedback/view/lake_home_page/normal_sub_page.dart';
 import 'package:we_pei_yang_flutter/feedback/view/new_post_page.dart';
+import 'package:we_pei_yang_flutter/feedback/view/post_detail_page.dart';
+import 'package:we_pei_yang_flutter/feedback/view/post_split.dart';
 import 'package:we_pei_yang_flutter/feedback/view/search_result_page.dart';
 import 'package:we_pei_yang_flutter/message/feedback_message_page.dart';
 import 'package:we_pei_yang_flutter/commons/themes/template/wpy_theme_data.dart';
@@ -31,6 +33,42 @@ import 'package:we_pei_yang_flutter/message/model/message_provider.dart';
 
 import 'package:badges/badges.dart' as badges;
 
+/// 平板分栏右栏：未选择时显示占位，选择帖子后内嵌详情（不压栈，点 ✕ 清空）
+class _PostDetailPane extends StatelessWidget {
+  const _PostDetailPane({required this.notifier});
+
+  final ValueNotifier<Post?> notifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Post?>(
+      valueListenable: notifier,
+      builder: (context, post, _) {
+        if (post == null) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.forum_outlined,
+                    size: 52,
+                    color:
+                        WpyTheme.of(context).get(WpyColorKey.oldHintColor)),
+                SizedBox(height: 12),
+                Text('从左侧选择一篇帖子查看',
+                    style: TextUtil.base.regular.sp(14).oldHint(context)),
+              ],
+            ),
+          );
+        }
+        return KeyedSubtree(
+          key: ValueKey(post.id),
+          child: PostDetailPage(post, split: true),
+        );
+      },
+    );
+  }
+}
+
 class FeedbackHomePage extends StatefulWidget {
   FeedbackHomePage({Key? key}) : super(key: key);
 
@@ -41,6 +79,9 @@ class FeedbackHomePage extends StatefulWidget {
 class FeedbackHomePageState extends State<FeedbackHomePage>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   final fbKey = new GlobalKey<FbTagsWrapState>();
+
+  /// 平板左右分栏：右栏当前选中的帖子（null = 未选择显示占位）
+  final ValueNotifier<Post?> _splitPost = ValueNotifier<Post?>(null);
 
   bool initializeRefresh = false;
 
@@ -150,6 +191,7 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
   void dispose() {
     LakeUtil.tabListRevision.removeListener(_onTabListChanged);
     tabController?.dispose();
+    _splitPost.dispose();
     super.dispose();
   }
 
@@ -448,7 +490,8 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
     return Scaffold(
       backgroundColor:
           WpyTheme.of(context).get(WpyColorKey.primaryBackgroundColor),
-      body: AnimatedSwitcher(
+      body: Builder(builder: (context) {
+        final body = AnimatedSwitcher(
         // 给状态切换增加动画
         duration: Duration(milliseconds: 200),
         child: FutureBuilder(
@@ -610,7 +653,20 @@ class FeedbackHomePageState extends State<FeedbackHomePage>
                 ],
               );
             }),
-      ),
+        );
+        if (MediaQuery.of(context).size.shortestSide < 600) return body;
+        // 平板：左侧列表 + 右侧内嵌帖子详情（左栏点击经 PostSplitScope 选中）
+        return PostSplitScope(
+            notifier: _splitPost,
+            child: Row(children: [
+              Expanded(child: body),
+              Container(
+                  width: 1,
+                  color:
+                      WpyTheme.of(context).get(WpyColorKey.lightBorderColor)),
+              Expanded(child: _PostDetailPane(notifier: _splitPost)),
+            ]));
+        }),
     );
   }
 }
