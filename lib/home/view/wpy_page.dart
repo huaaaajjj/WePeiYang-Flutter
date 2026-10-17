@@ -250,6 +250,10 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
       );
 
   Widget _functionCardsView() {
+    // 平板大屏：左栏工具卡竖排 + 右栏 Study Room/GPA/Exam（手机端保持原样）
+    if (MediaQuery.of(context).size.shortestSide >= 600) {
+      return _functionCardsViewWide();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -303,10 +307,7 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                 // ),
                 Container(
                   width: 1.sw - 60.w,
-                  // 平板窄栏下自习室楼栋网格约 8 列 × 2 行，加高避免第二行被裁
-                  height: MediaQuery.of(context).size.shortestSide >= 600
-                      ? 400.h
-                      : 300.h,
+                  height: 300.h,
                   child: MainPageStudyRoomWidget(),
                 ),
                 Container(
@@ -324,11 +325,96 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
       ],
     );
   }
+
+  /// 平板大屏：左栏 = 工具卡竖排（仍可拖拽排序）；右栏 = Study Room / GPA / Exam
+  Widget _functionCardsViewWide() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 372,
+              child: SliverCardsWidget(
+                CommonPreferences.displayedTool.value,
+                axis: Axis.vertical,
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(22.w, 0, 26.w, 0),
+                    child: TabBar(
+                      controller: _tc,
+                      dividerHeight: 0,
+                      labelStyle: TextUtil.base.w400.sp(14),
+                      labelPadding: EdgeInsets.zero,
+                      labelColor:
+                          WpyTheme.of(context).get(WpyColorKey.basicTextColor),
+                      unselectedLabelColor: WpyTheme.of(context)
+                          .get(WpyColorKey.secondaryTextColor),
+                      indicator: CustomIndicator(
+                          left: true,
+                          borderSide: BorderSide(
+                              color: WpyTheme.of(context)
+                                  .get(WpyColorKey.warningColor),
+                              width: 4)),
+                      tabs: [
+                        Align(
+                            alignment: Alignment.centerLeft,
+                            child: Tab(text: 'Study Room')),
+                        Align(
+                            alignment: Alignment.centerLeft,
+                            child: Tab(text: 'GPA Curves')),
+                        Align(
+                            alignment: Alignment.centerLeft,
+                            child: Tab(text: 'Exam Detail')),
+                      ]),
+                  ),
+                  SizedBox(
+                    height: 640.h,
+                    child: TabBarView(
+                        controller: _tc,
+                        physics: BouncingScrollPhysics(),
+                        children: [
+                          // 右栏约 4 列楼栋 × 4 行，加高避免楼栋行被裁
+                          Container(
+                            width: 1.sw - 60.w,
+                            height: 640.h,
+                            child: MainPageStudyRoomWidget(),
+                          ),
+                          Container(
+                            width: 1.sw - 60.w,
+                            height: 300.h,
+                            child: GPAPreview(),
+                          ),
+                          Container(
+                            width: 1.sw - 60.w,
+                            height: 300.h,
+                            child: WpyExamWidget(),
+                          ),
+                        ]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (CommonPreferences.showMap.value) const MapAndCalender(),
+      ],
+    );
+  }
 }
 
 class SliverCardsWidget extends StatelessWidget {
   final List<CardBean> cards;
   final List<int> order;
+
+  /// 平板左栏为竖排（Axis.vertical），手机端保持横排
+  final Axis axis;
   final ScrollController controller = ScrollController();
   static List<String> peiyangLabel = [
     '课程表',
@@ -341,18 +427,22 @@ class SliverCardsWidget extends StatelessWidget {
     // '失物招领'
   ];
 
-  SliverCardsWidget(this.cards)
+  SliverCardsWidget(this.cards, {this.axis = Axis.horizontal})
       : order = CommonPreferences.sanitizedDisplayOrder();
 
   @override
   Widget build(BuildContext context) {
+    final vertical = axis == Axis.vertical;
     Widget cardList = ReorderableListView.builder(
       proxyDecorator: (Widget child, int index, Animation<double> animation) {
         return child;
       },
-      scrollDirection: Axis.horizontal,
+      scrollDirection: axis,
       padding: EdgeInsets.only(left: 16.h),
-      physics: const BouncingScrollPhysics(),
+      // 竖排时整列一次排完（高度按卡片数给定），禁用内部滚动避免与页面抢手势
+      physics: vertical
+          ? const NeverScrollableScrollPhysics()
+          : const BouncingScrollPhysics(),
       clipBehavior: Clip.none,
       itemCount: order.length,
       itemBuilder: (context, i) {
@@ -389,7 +479,8 @@ class SliverCardsWidget extends StatelessWidget {
     );
 
     return SizedBox(
-      height: 100.h,
+      // 竖排（平板左栏）按卡片数取高；横排（手机）保持 100.h 原样
+      height: vertical ? order.length * 98.h : 100.h,
       width: double.infinity,
       child: cardList,
     );
