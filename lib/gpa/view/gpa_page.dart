@@ -10,6 +10,7 @@ import 'package:we_pei_yang_flutter/auth/auth_router.dart';
 import 'package:we_pei_yang_flutter/commons/preferences/common_prefs.dart';
 import 'package:we_pei_yang_flutter/commons/themes/template/wpy_theme_data.dart';
 import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
+import 'package:we_pei_yang_flutter/feedback/util/splitscreen_util.dart';
 import 'package:we_pei_yang_flutter/gpa/model/color.dart';
 import 'package:we_pei_yang_flutter/gpa/model/gpa_model.dart';
 import 'package:we_pei_yang_flutter/gpa/model/gpa_notifier.dart';
@@ -48,6 +49,33 @@ class _GPAPageState extends State<GPAPage> {
 
   @override
   Widget build(BuildContext context) {
+    final wide = SplitUtil.useTabletLayout(context);
+    final curveLength = context.watch<GPANotifier>().curveData.length;
+    final charts = <Widget>[
+      if (wide)
+        LayoutBuilder(
+          builder: (_, box) =>
+              RadarChartWidget(_gpaColors, height: min(350.0, box.maxWidth)),
+        )
+      else
+        RadarChartWidget(_gpaColors),
+      GPAStatsWidget(_gpaColors),
+      LayoutBuilder(
+        builder: (_, box) => Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: wide ? 64 : 0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxWidth: curveLength > 4 ? 800.w : box.maxWidth),
+                child: GPACurve(_gpaColors, isPreview: false),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ];
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark
           .copyWith(systemNavigationBarColor: _gpaColors[0]),
@@ -73,24 +101,39 @@ class _GPAPageState extends State<GPAPage> {
             data: Theme.of(context).copyWith(
                 secondaryHeaderColor: WpyTheme.of(context)
                     .get(WpyColorKey.primaryBackgroundColor)),
-            child: ListView(
-              children: [
-                RadarChartWidget(_gpaColors),
-                GPAStatsWidget(_gpaColors),
-                Center(
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
+            child: wide
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Align(
+                      alignment: Alignment.topCenter,
                       child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                              maxWidth:
-                                  context.watch<GPANotifier>().curveData.length >
-                                          4
-                                      ? 800.w
-                                      : 1.sw),
-                          child: GPACurve(_gpaColors, isPreview: false)))),
-                CourseListWidget(_gpaColors)
-              ],
-            ),
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ListView(
+                                key: const PageStorageKey('gpa-overview'),
+                                primary: false,
+                                children: charts,
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: ListView(
+                                key: const PageStorageKey('gpa-courses'),
+                                primary: false,
+                                children: [CourseListWidget(_gpaColors)],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : ListView(
+                    children: [...charts, CourseListWidget(_gpaColors)],
+                  ),
           ),
         ),
       ),
@@ -161,8 +204,9 @@ class GPAAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class RadarChartWidget extends StatefulWidget {
   final List<Color> gpaColors;
+  final double height;
 
-  RadarChartWidget(this.gpaColors);
+  RadarChartWidget(this.gpaColors, {this.height = 350});
 
   @override
   _RadarChartState createState() => _RadarChartState();
@@ -172,7 +216,13 @@ class _RadarChartState extends State<RadarChartWidget> {
   /// isTaped为true时雷达图有透明度
   bool _isTaped = false;
 
-  static Timer? _timer;
+  Timer? _timer;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +273,7 @@ class _RadarChartState extends State<RadarChartWidget> {
       );
     else
       return SizedBox(
-        height: 350,
+        height: widget.height,
         child: CustomPaint(
           painter: _RadarChartPainter(
             _list,
