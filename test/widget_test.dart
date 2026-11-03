@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +36,13 @@ void main() {
     EnvConfig.init();
     await StorageUtil.init();
     await CommonPreferences.init();
+  });
+
+  test('default app version matches the package version', () {
+    final version = RegExp(r'^version:\s*(\S+)', multiLine: true)
+        .firstMatch(File('pubspec.yaml').readAsStringSync())!
+        .group(1);
+    expect('${EnvConfig.VERSION}+${EnvConfig.VERSIONCODE}', version);
   });
 
   test('startup dependencies are initialized in order', () {

@@ -184,7 +184,7 @@ class _SettingPageState extends State<SettingPage> {
                 else {
                   showAboutDialog(
                     context: context,
-                    applicationName: "微北洋",
+                    applicationName: "微北洋 For Pad",
                     applicationVersion:
                         "${EnvConfig.VERSION}+${EnvConfig.VERSIONCODE}",
                     applicationIcon: Image.asset(
