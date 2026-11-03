@@ -360,7 +360,6 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
             SizedBox(width: 32),
             Expanded(
               child: Column(
-                // stretch：TabBar 撑满右栏宽度均分三份（否则会缩到内容宽度、标签挤成一团）
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
@@ -368,8 +367,10 @@ class WPYPageState extends State<WPYPage> with SingleTickerProviderStateMixin {
                     child: TabBar(
                       controller: _tc,
                       dividerHeight: 0,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
                       labelStyle: TextUtil.base.w400.sp(14),
-                      labelPadding: EdgeInsets.zero,
+                      labelPadding: EdgeInsets.only(right: 24.w),
                       labelColor:
                           WpyTheme.of(context).get(WpyColorKey.basicTextColor),
                       unselectedLabelColor: WpyTheme.of(context)

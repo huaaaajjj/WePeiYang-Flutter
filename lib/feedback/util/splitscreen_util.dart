@@ -17,12 +17,12 @@ class SplitUtil {
         mq.orientation == Orientation.landscape;
   }
 
-  static late double w = needHorizontalView ? 0.5.w : 1.w;
-  static late double h = 1.h;
-  static late double r = 1.r;
-  static late double sw = needHorizontalView ? 0.5.sw : 1.sw;
-  static late double sh = 1.sh;
-  static late double toolbarWidth = Platform.isWindows
+  static double get w => needHorizontalView ? 0.5.w : 1.w;
+  static double get h => 1.h;
+  static double get r => 1.r;
+  static double get sw => needHorizontalView ? 0.5.sw : 1.sw;
+  static double get sh => 1.sh;
+  static double get toolbarWidth => Platform.isWindows
       ? needHorizontalView
           ? 25
           : 50
