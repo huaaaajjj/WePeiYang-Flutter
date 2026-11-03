@@ -76,10 +76,11 @@ void main() async {
     /// 初始化日志文件持久化（重启不丢、可导出）
     await initAppLogger();
 
-    /// 高刷
+    /// 不覆盖系统的刷新率与省电策略
     if (Platform.isAndroid) {
-      unawaited(FlutterDisplayMode.setHighRefreshRate().catchError((_) {
-        Log.i('设备不支持高刷新率', tag: 'app');
+      unawaited(FlutterDisplayMode.setPreferredMode(DisplayMode.auto)
+          .catchError((_) {
+        Log.i('显示模式设置不可用，使用系统默认刷新率', tag: 'app');
       }));
     }
 

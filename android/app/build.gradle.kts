@@ -184,6 +184,12 @@ android {
                 }
             }
         }
+
+        getByName("profile") {
+            initWith(getByName("debug"))
+            matchingFallbacks.clear()
+            matchingFallbacks += listOf("debug", "release")
+        }
     }
 }
 
