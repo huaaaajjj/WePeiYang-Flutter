@@ -1,13 +1,15 @@
-# 微北洋APP
+# 微北洋 For Pad
 
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/twtstudio/WePeiYang-Flutter?color=green)
 ![GitHub contributors](https://img.shields.io/github/contributors-anon/twtstudio/WePeiYang-Flutter?color=blue)
 ![GitHub Repo stars](https://img.shields.io/github/stars/twtstudio/WePeiYang-Flutter?logo=star&color=yellow)
 ![GitHub](https://img.shields.io/github/license/twtstudio/WePeiYang-Flutter)
 
+> 本仓库是微北洋 Flutter 客户端的**平板适配版本**，基于 [twtstudio/WePeiYang-Flutter](https://github.com/twtstudio/WePeiYang-Flutter) 开发，重点适配 Android 平板横屏、大屏双栏布局和窗口尺寸切换；手机及平板竖屏继续使用原有布局。
+
 ## 项目背景
 
-微北洋是由天津大学天外天工作室(移动组)开发运维的校园APP，面向天津大学全体师生，集课表查询、自习室查询、校园公告，GPA查询、失物招领为一体,是每个天大学子都在用的校园掌中宝。
+微北洋是由天津大学天外天工作室（移动组）开发运维的校园 APP，面向天津大学全体师生，集课表、自习室、校园公告、GPA、失物招领等功能于一体。本分支在官方 Flutter 客户端基础上进行平板适配，应用名称为「微北洋 For Pad」。
 
 天津大学天外天工作室主页：[微北洋主页](https://mobile.twt.edu.cn/wpy/index.html)（仅限校园网访问）
 
@@ -93,7 +95,7 @@
 
 ### 命名规范
 
-## 当前版本：4.4.8
+## 当前版本：4.6.4+197（平板适配分支）
 
 本期更新内容：
 
