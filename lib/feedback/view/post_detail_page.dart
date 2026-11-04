@@ -11,7 +11,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:miui_long_screenshot/miui_long_screenshot.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:screenshot/screenshot.dart';
@@ -761,10 +760,7 @@ class _PostDetailPageState extends State<PostDetailPage>
           _onScrollNotification(scrollInfo),
     );
 
-    return MiuiLongScreenshot(
-      controller: _controller,
-      child: listener,
-    );
+    return listener;
   }
 
   /// 平板大屏：正文与评论收进居中阅读栏（与论坛流/我的页同为 788dp，手机端不受影响）
