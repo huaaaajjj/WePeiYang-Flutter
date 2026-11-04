@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:we_pei_yang_flutter/commons/channel/download/download_manager.dart';
 import 'package:we_pei_yang_flutter/commons/channel/install/hotfix.dart';
 import 'package:we_pei_yang_flutter/commons/channel/install/install.dart';
@@ -47,6 +49,25 @@ class UpdateManager extends UpdateStatusListener {
   }
 
   Future<void> checkUpdate({bool auto = true}) async {
+    final package = await PackageInfo.fromPlatform();
+    if (package.packageName == 'com.twt.service.pad') {
+      // ponytail: fork updates are manual; never apply upstream APKs or hotfixes.
+      if (!auto) {
+        try {
+          if (!await launchUrl(
+            Uri.parse(
+                'https://github.com/huaaaajjj/WePeiYang-Flutter/releases/latest'),
+            mode: LaunchMode.externalApplication,
+          )) {
+            throw StateError('Could not open fork releases');
+          }
+        } catch (error, stack) {
+          Log.e(error, stack, 'update');
+          ToastProvider.error('无法打开浏览器，请到本项目 GitHub Releases 下载更新');
+        }
+      }
+      return;
+    }
     switch (status) {
       case UpdateStatus.idle:
         _auto = auto;

@@ -103,6 +103,7 @@ android {
 
     buildTypes {
         release {
+            applicationIdSuffix = ".pad"
             signingConfig = signingConfigs.getByName("config")
 
             var environment = "DEVELOP"

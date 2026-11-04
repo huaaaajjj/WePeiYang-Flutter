@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -75,6 +76,10 @@ Future<void> _pumpGpa(
             splitScreenMode: false,
           );
           TextUtil.init(context);
+          if (const String.fromEnvironment('GPA_TEST_SCREENSHOT').isNotEmpty) {
+            TextUtil.base = TextUtil.base
+                .copyWith(fontFamilyFallback: const ['NotoSansSC']);
+          }
           return child!;
         },
         home: RepaintBoundary(
@@ -99,9 +104,15 @@ void main() {
     CommonPreferences.lakeNickname.value = 'TEST DATA';
     WpyTheme.init();
     if (const String.fromEnvironment('GPA_TEST_SCREENSHOT').isNotEmpty) {
+      // Widget tests have no device font fallback; keep demo Chinese legible.
+      final chineseFont = ByteData.sublistView(
+          await File('assets/fonts/zh/NotoSansSC-Medium.otf').readAsBytes());
+      await (FontLoader('NotoSansSC')..addFont(Future.value(chineseFont)))
+          .load();
       for (final (family, asset) in [
         ('Swis', 'assets/fonts/en/Swis721-Blk-BT-Black-2.ttf'),
         ('ProductSans', 'assets/fonts/en/ProductSans-Regular.ttf'),
+        ('MaterialIcons', 'fonts/MaterialIcons-Regular.otf'),
       ]) {
         await (FontLoader(family)..addFont(rootBundle.load(asset))).load();
       }

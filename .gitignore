@@ -35,6 +35,7 @@ CMakeFiles/
 .flutter-plugins-dependencies
 .packages
 .gradle/
+.kotlin/
 /pubspec.lock
 .pub-cache/
 .pub/
