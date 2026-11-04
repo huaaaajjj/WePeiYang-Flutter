@@ -1,6 +1,5 @@
 # 微北洋 For Pad
 
-**为 Android 平板重新安排校园生活，而不只是放大手机版。**
 
 [![Latest release](https://img.shields.io/github/v/release/huaaaajjj/WePeiYang-Flutter?label=For%20Pad)](https://github.com/huaaaajjj/WePeiYang-Flutter/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-Android%20Tablet-3b82f6)](https://github.com/huaaaajjj/WePeiYang-Flutter/releases)
@@ -30,18 +29,11 @@
 
 ![GPA 横屏布局，TEST DATA 为模拟数据](docs/screenshots/gpa.png)
 
-<details>
-<summary>展开查看地图·校历</summary>
-
-![地图与校历的大屏卡片布局](docs/screenshots/map-calendar.png)
-
-</details>
-
 > 截图说明：首页、海棠、地图·校历来自平板实机；GPA 由真实页面组件配合模拟数据渲染。截图已裁去系统状态栏并去除元数据；问候昵称、发布者信息、帖子编号、外链和二维码使用不透明覆盖或占位文字替换。为避免暴露个人安排，不展示真实课表。截图中的脱敏标记不是应用功能。
 
 ## 下载与安装
 
-前往 **[本仓库 Releases](https://github.com/huaaaajjj/WePeiYang-Flutter/releases/latest)**，下载附件中的 APK；不要把 GitHub 自动生成的 Source code 压缩包当作安装包。
+前往 **[本仓库 Releases](https://github.com/huaaaajjj/WePeiYang-Flutter/releases/latest)**，下载附件中的 APK。
 
 | 项目 | 本次发行 |
 | --- | --- |
@@ -49,15 +41,10 @@
 | 应用版本 | `4.6.4+198`，基于上游 `4.6.4` |
 | 应用名称 | 微北洋 For Pad |
 | 独立包名 | `com.twt.service.pad` |
-| 构建模式 | **Release**，不是此前的 Profile 包 |
-| 系统要求 | Android 7.0 / API 24 及以上 |
-| CPU 架构 | ARM64 / ARMv7（同一 APK，不支持 x86） |
-| 签名 | 沿用此前测试包的签名证书，**仍为测试签名** |
 
-- 可以与官方微北洋及此前的 `.develop` 测试包并存，**不覆盖、不清除它们的数据**。
+- 可以与官方微北洋包并存，**不覆盖、不清除它们的数据**。
 - 独立包名意味着首次安装需要重新登录；此前测试包的数据不会自动迁移。
 - 后续版本需要保持包名与签名一致才能覆盖升级。仅从本仓库下载并核对发行页提供的 SHA-256。
-- 「正式发布」指本 fork 的非预发布 Release，不代表天外天工作室官方发行，也不意味着已改用正式发行密钥。
 - 本 fork 独立包不接收上游自动 APK / 热更新；在设置中手动「检查更新」会打开本仓库的 Releases 页面。
 
 ## 适配范围与已知限制
@@ -70,41 +57,6 @@
 - 首页可选的内嵌地图·校历区仍待单独实机补验；失物招领未开放入口的页面不宣称已验收。
 - 静态检查保留已有的 **27 warning、2 info、0 error**；未通过关闭分析规则掩盖诊断。
 
-## 从源码构建
-
-本次本地使用 Flutter **3.47.7**、Dart **3.13.5** 和 JDK 17 兼容配置。Android SDK、Flutter SDK 与签名信息放在本地配置中，**不要提交密钥或密码**。
-
-```sh
-flutter pub get
-flutter test --no-pub
-flutter analyze --no-pub
-```
-
-`flutter analyze` 目前会因上述既有诊断返回非零退出码；这不等于检查完全通过。
-
-Android Release 构建使用 `android/local.properties` 中的 `jksPath`、`storePassword`、`keyAlias`。使用你自己的签名只能安装你自己的构建，不能覆盖不同签名的已安装版本。
-
-```sh
-flutter build apk --release \
-  --target-platform=android-arm,android-arm64 \
-  --dart-define=ENVIRONMENT=RELEASE \
-  --dart-define=VERSION=4.6.4 \
-  --dart-define=VERSIONCODE=198
-```
-
-产物位于 `build/app/outputs/flutter-apk/app-release.apk`。当前仓库的 Actions 尚未配置发行签名 secrets，不将它作为可直接下载的平板版通道。
-
-<details>
-<summary>Windows：项目与 Pub 缓存不在同一磁盘时的构建提示</summary>
-
-若 Kotlin 增量编译出现 `different roots` / `Storage ... already registered`，可仅为当前构建设置以下 Gradle 参数后重试，不必修改全局配置或清空缓存：
-
-```sh
-# Bash / Git Bash；随后运行上面的 flutter build 命令
-export GRADLE_OPTS='-Dorg.gradle.project.kotlin.incremental=false -Dorg.gradle.project.kotlin.compiler.execution.strategy=in-process'
-```
-
-</details>
 
 ## 原项目与致谢
 
