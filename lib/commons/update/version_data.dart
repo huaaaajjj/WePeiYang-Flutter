@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:we_pei_yang_flutter/commons/channel/download/download_item.dart';
 import 'package:we_pei_yang_flutter/commons/environment/config.dart';
 import 'package:we_pei_yang_flutter/commons/update/update_service.dart';
@@ -33,6 +34,11 @@ class AndroidVersion {
   final String flutterFixSo;
   final String flutterSoFileSize;
   bool canHotFix;
+  final String? _forkApkUrl;
+  final String? apkDigest;
+  final int? apkBytes;
+
+  bool get isFork => _forkApkUrl != null;
 
   AndroidVersion._({
     required this.versionCode,
@@ -46,7 +52,10 @@ class AndroidVersion {
     required this.flutterFixSo,
     required this.flutterSoFileSize,
     required this.canHotFix,
-  });
+    String? forkApkUrl,
+    this.apkDigest,
+    this.apkBytes,
+  }) : _forkApkUrl = forkApkUrl;
 
   factory AndroidVersion.fromJson(Map json) {
     final fixCode = json['flutterFixCode'] ?? 0;
@@ -66,8 +75,46 @@ class AndroidVersion {
     );
   }
 
+  factory AndroidVersion.fork({
+    required int versionCode,
+    required String version,
+    required String content,
+    required String time,
+    required String apkUrl,
+    required String digest,
+    required int bytes,
+  }) =>
+      AndroidVersion._(
+        versionCode: versionCode,
+        version: version,
+        content: content,
+        time: time,
+        isForced: false,
+        path: '',
+        apkSize: '${(bytes / 1048576).toStringAsFixed(1)} MiB',
+        flutterFixCode: 0,
+        flutterFixSo: '',
+        flutterSoFileSize: '',
+        canHotFix: false,
+        forkApkUrl: apkUrl,
+        apkDigest: digest,
+        apkBytes: bytes,
+      );
+
+  Future<bool> verifyApk(File file) async {
+    try {
+      if (!await file.exists()) return false;
+      if (!isFork) return true;
+      if (await file.length() != apkBytes) return false;
+      return (await crypto.sha256.bind(file.openRead()).first).toString() ==
+          apkDigest;
+    } on FileSystemException {
+      return false;
+    }
+  }
+
   String get apkName {
-    return "$versionCode-wby.apk";
+    return isFork ? "$versionCode-for-pad.apk" : "$versionCode-wby.apk";
   }
 
   String get zipName {
@@ -90,7 +137,8 @@ class AndroidVersion {
         soName;
   }
 
-  String get apkUrl => "${UpdateService.BASEURL}downloadFile/$path";
+  String get apkUrl =>
+      _forkApkUrl ?? "${UpdateService.BASEURL}downloadFile/$path";
 
   String get zipUrl => "${UpdateService.BASEURL}downloadFile/$flutterFixSo";
 

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:we_pei_yang_flutter/commons/channel/download/download_manager.dart';
 import 'package:we_pei_yang_flutter/commons/channel/install/hotfix.dart';
 import 'package:we_pei_yang_flutter/commons/channel/install/install.dart';
@@ -14,6 +13,7 @@ import 'package:we_pei_yang_flutter/commons/util/log/log.dart';
 import 'package:we_pei_yang_flutter/commons/util/toast_provider.dart';
 
 import 'dialog/update_dialog.dart';
+import 'fork_update_service.dart';
 import 'update_service.dart';
 import 'update_util.dart';
 import 'version_data.dart';
@@ -33,7 +33,11 @@ class UpdateManager extends UpdateStatusListener {
   late AndroidVersion _androidVersion;
   late IOSVersion _iosVersion;
 
-  dynamic get version => Platform.isAndroid ? _androidVersion : _iosVersion;
+  bool _isFork = false;
+  bool get isFork => _isFork;
+
+  dynamic get version =>
+      _isFork || Platform.isAndroid ? _androidVersion : _iosVersion;
 
   /// 是否为自动检查更新
   bool _auto = false;
@@ -49,116 +53,127 @@ class UpdateManager extends UpdateStatusListener {
   }
 
   Future<void> checkUpdate({bool auto = true}) async {
-    final package = await PackageInfo.fromPlatform();
-    if (package.packageName == 'com.twt.service.pad') {
-      // ponytail: fork updates are manual; never apply upstream APKs or hotfixes.
-      if (!auto) {
-        try {
-          if (!await launchUrl(
-            Uri.parse(
-                'https://github.com/huaaaajjj/WePeiYang-Flutter/releases/latest'),
-            mode: LaunchMode.externalApplication,
-          )) {
-            throw StateError('Could not open fork releases');
-          }
-        } catch (error, stack) {
-          Log.e(error, stack, 'update');
-          ToastProvider.error('无法打开浏览器，请到本项目 GitHub Releases 下载更新');
-        }
-      }
-      return;
-    }
-    switch (status) {
-      case UpdateStatus.idle:
-        _auto = auto;
-        // 无事发生就检查更新
-        setGetVersion();
-        // 获取最新版本
-        final dynamic v = Platform.isIOS
-            ? await UpdateService.latestIOSVersion
-            : await UpdateService.latestAndroidVersion;
-        // 如果获取最新版本失败，需要显示弹窗的时候显示检查更新失败
-        if (v == null) {
-          setIdle();
-          if (!_auto) ToastProvider.error("检查更新失败");
-          return;
-        }
-        if (Platform.isAndroid)
-          _androidVersion = v as AndroidVersion;
-        else if (Platform.isIOS) _iosVersion = v as IOSVersion;
-
-        // 如果今天不再检查更新，且为自动更新，且不是强制更新
-        if (!UpdateUtil.todayCheckAgain && auto && !v.isForced) {
-          setIdle();
-          return;
-        }
-        // 如果跳过版本
-        if (auto &&
-            CommonPreferences.ignoreUpdateVersion.value == version.version) {
-          setIdle();
-          return;
-        }
-
-        if (Platform.isAndroid) {
-          debugPrint("remoteVersionCode ${v.versionCode}");
-          debugPrint("localVersionCode  ${EnvConfig.VERSIONCODE}");
-          await InstallManager.getCanGoToMarket();
-
-          if (v.versionCode <= EnvConfig.VERSIONCODE) {
-            // 如果新获取到的版本不高于现在的版本，那么就不更新
+    try {
+      final package = await PackageInfo.fromPlatform();
+      _isFork = package.packageName == 'com.twt.service.pad';
+      switch (status) {
+        case UpdateStatus.idle:
+          _auto = auto;
+          // 无事发生就检查更新
+          setGetVersion();
+          // 获取最新版本
+          if (_isFork && auto && !UpdateUtil.todayCheckAgain) {
             setIdle();
-            if (!_auto) ToastProvider.success('已是最新版本');
-          } else {
-            //如果新获取到的版本高于当前版本，则更新
-            // 1.删除原来的（不是当前版本的）apk和so
-            await _deleteOriginalFile();
-            // 2.判断是否有当前文件可用
-            if (await _checkIfFileCanUse()) return;
-            // 3.如果没有的话先判断是否 强制更新 或 手动更新 或 不能使用热修复
-            if (v.isForced || !_auto || !v.canHotFix) {
-              // 如果不能热修复 或 强制更新 或 手动更新，则弹窗对话框
+            return;
+          }
+          final dynamic v = _isFork
+              ? await ForkUpdateService.latestAndroidVersion
+              : Platform.isIOS
+                  ? await UpdateService.latestIOSVersion
+                  : await UpdateService.latestAndroidVersion;
+          // 如果获取最新版本失败，需要显示弹窗的时候显示检查更新失败
+          if (v == null) {
+            setIdle();
+            if (!_auto) ToastProvider.error("检查更新失败");
+            return;
+          }
+          if (_isFork || Platform.isAndroid)
+            _androidVersion = v as AndroidVersion;
+          else if (Platform.isIOS) _iosVersion = v as IOSVersion;
+
+          // 如果今天不再检查更新，且为自动更新，且不是强制更新
+          if (!UpdateUtil.todayCheckAgain && auto && !v.isForced) {
+            setIdle();
+            return;
+          }
+          // 如果跳过版本
+          if (auto &&
+              CommonPreferences.ignoreUpdateVersion.value == version.version) {
+            setIdle();
+            return;
+          }
+
+          if (_isFork || Platform.isAndroid) {
+            final localCode = _isFork
+                ? int.tryParse(package.buildNumber)
+                : EnvConfig.VERSIONCODE;
+            if (localCode == null) {
+              setIdle();
+              if (!auto) ToastProvider.error('无法读取当前应用版本');
+              return;
+            }
+            if (!_isFork) await InstallManager.getCanGoToMarket();
+
+            if (v.versionCode <= localCode) {
+              // 如果新获取到的版本不高于现在的版本，那么就不更新
+              setIdle();
+              if (!_auto) ToastProvider.success('已是最新版本');
+            } else {
+              //如果新获取到的版本高于当前版本，则更新
+              // 1.删除原来的（不是当前版本的）apk和so
+              await _deleteOriginalFile();
+              // 2.判断是否有当前文件可用
+              if (await _checkIfFileCanUse()) return;
+              // 3.如果没有的话先判断是否 强制更新 或 手动更新 或 不能使用热修复
+              if (v.isForced || !_auto || !v.canHotFix) {
+                // 如果不能热修复 或 强制更新 或 手动更新，则弹窗对话框
+                UpdateDialog.message.show();
+              } else {
+                // 否则，就优先热更新
+                setDownload();
+              }
+            }
+          } else if (Platform.isIOS) {
+            final localVersion = await LocalSetting.getBundleVersion();
+            debugPrint("remoteVersionCode ${v.version}");
+            debugPrint("localVersionCode  ${localVersion}");
+            final remoteVersion = (v.version as String);
+            if (_versionCmp(localVersion, remoteVersion)) {
               UpdateDialog.message.show();
             } else {
-              // 否则，就优先热更新
-              setDownload();
+              // 如果新获取到的版本不高于现在的版本，那么就不更新
+              setIdle();
+              if (!_auto) ToastProvider.success('已是最新版本');
             }
           }
-        } else if (Platform.isIOS) {
-          final localVersion = await LocalSetting.getBundleVersion();
-          debugPrint("remoteVersionCode ${v.version}");
-          debugPrint("localVersionCode  ${localVersion}");
-          final remoteVersion = (v.version as String);
-          if (_versionCmp(localVersion, remoteVersion)) {
-            UpdateDialog.message.show();
-          } else {
-            // 如果新获取到的版本不高于现在的版本，那么就不更新
-            setIdle();
-            if (!_auto) ToastProvider.success('已是最新版本');
+          break;
+        case UpdateStatus.getVersion:
+          // 正在请求检查更新接口，弹窗告诉他不要急
+          if (!auto) {
+            ToastProvider.running("正在请求最新版本信息");
           }
-        }
-        break;
-      case UpdateStatus.getVersion:
-        // 正在请求检查更新接口，弹窗告诉他不要急
-        if (!auto) {
-          ToastProvider.running("正在请求最新版本信息");
-        }
-        break;
-      case UpdateStatus.download:
-        // 既然正在下载就显示进度
-        UpdateDialog.progress.show();
-        break;
-      case UpdateStatus.load:
-        // 正在加载也显示进度
-        UpdateDialog.progress.show();
-        break;
-      case UpdateStatus.error:
-        UpdateDialog.failure.show();
-        break;
+          break;
+        case UpdateStatus.download:
+          // 既然正在下载就显示进度
+          UpdateDialog.progress.show();
+          break;
+        case UpdateStatus.load:
+          // 正在加载也显示进度
+          UpdateDialog.progress.show();
+          break;
+        case UpdateStatus.error:
+          UpdateDialog.failure.show();
+          break;
+      }
+    } catch (error, stack) {
+      Log.e(error, stack, 'update');
+      setIdle();
+      if (!auto) ToastProvider.error('检查更新失败，请稍后重试');
     }
   }
 
   /// 检查是否有热修复文件或apk可以使用
   Future<bool> _checkIfFileCanUse() async {
+    if (_isFork) {
+      final file = File(_androidVersion.apkPath);
+      if (await _androidVersion.verifyApk(file)) {
+        setLoad();
+        UpdateDialog.install.show();
+        return true;
+      }
+      if (await file.exists()) await file.delete();
+      return false;
+    }
     // 可能使用热修复，判断是否有热修复文件可使用
     final soCanUse = await HotFixManager.soFileCanUse(version.soName);
     if (soCanUse == true) {
@@ -189,7 +204,7 @@ class UpdateManager extends UpdateStatusListener {
     progress = 0;
     // 不自动打开进度条页面
 
-    if (version.canHotFix) {
+    if (!_isFork && version.canHotFix) {
       // 如果能热修复，下载zip文件
       _updateByHotfix();
     } else {
@@ -288,9 +303,21 @@ class UpdateManager extends UpdateStatusListener {
     }
 
     // 如果成功，就先关闭进度条，然后显示安装对话框
+    final candidate = _androidVersion;
     SuccessCallback downloadSuccess = (task) async {
-      setLoad();
-      UpdateDialog.install.show();
+      try {
+        final file = File(task.path);
+        if (!await candidate.verifyApk(file)) {
+          if (await file.exists()) await file.delete();
+          throw const FormatException(
+              'APK size or SHA-256 verification failed');
+        }
+        setLoad();
+        UpdateDialog.install.show();
+      } catch (error, stack) {
+        Log.e(error, stack, 'update');
+        _updateByApkError();
+      }
     };
 
     // 如果创建任务失败，就关闭任务信息弹窗，并显示创建任务失败
@@ -323,6 +350,25 @@ class UpdateManager extends UpdateStatusListener {
     );
   }
 
+  Future<void> installUpdate() async {
+    try {
+      // Recheck at the last trust boundary, not just when download completes.
+      if (!await _androidVersion.verifyApk(File(_androidVersion.apkPath))) {
+        final file = File(_androidVersion.apkPath);
+        if (await file.exists()) await file.delete();
+        throw const FormatException(
+            'APK verification failed before installation');
+      }
+      await InstallManager.install(_androidVersion.apkPath,
+          expectedVersionCode: _isFork ? _androidVersion.versionCode : null);
+      if (!_androidVersion.isForced) setIdle();
+    } catch (error, stack) {
+      Log.e(error, stack, 'install');
+      setError();
+      UpdateDialog.failure.show();
+    }
+  }
+
   /// 删除之前下载的应用更新相关文件
   Future<void> _deleteOriginalFile() async {
     final apkDir = Directory(DownloadType.apk.path);
@@ -330,17 +376,18 @@ class UpdateManager extends UpdateStatusListener {
 
     for (var file in apkDir.listSync()) {
       final name = file.path.split(Platform.pathSeparator).last;
+      if (_isFork && !RegExp(r'^\d+-for-pad\.apk$').hasMatch(name)) continue;
 
       // 如果下载的文件是apk，则将不是新版本的删除
       if (name.endsWith('.apk')) {
         final versionCode = int.tryParse(name.split('-')[0]) ?? 0;
         if (versionCode < _androidVersion.versionCode) {
-          file.delete();
+          await file.delete();
         }
       }
 
       // 如果下载的文件以"-libapp.zip"结尾，直接删除
-      if (name.endsWith('-libapp.zip')) file.delete();
+      if (name.endsWith('-libapp.zip')) await file.delete();
     }
   }
 }

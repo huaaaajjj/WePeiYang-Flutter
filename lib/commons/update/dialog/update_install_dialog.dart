@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:we_pei_yang_flutter/commons/channel/install/install.dart';
 import 'package:we_pei_yang_flutter/commons/update/dialog/widgets/update_detail.dart';
 import 'package:we_pei_yang_flutter/commons/update/dialog/widgets/update_title.dart';
 import 'package:we_pei_yang_flutter/commons/update/update_manager.dart';
@@ -22,8 +21,7 @@ class UpdateInstallDialog extends StatelessWidget {
     }
 
     void ok() {
-      InstallManager.install(manager.version.apkPath);
-      if (!manager.version.isForced) manager.setIdle();
+      manager.installUpdate();
     }
 
     Widget buttons;

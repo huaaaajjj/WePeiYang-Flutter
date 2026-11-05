@@ -7,16 +7,10 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # 请保证
 # 'package:we_pei_yang_flutter/commons/environment/config.dart'
 # 中的 version 和 versionCode 保持一致
-version: 4.6.4+198
+version: 4.6.4+199
 
-# Build:
-# flutter build apk \
-#  --dart-define=ENVIRONMENT=RELEASE \
-#  --dart-define=VERSION=4.4.7 \
-#  --dart-define=VERSIONCODE=148 \
-#  --target-platform=android-arm,android-arm64 \
-#  --split-per-abi \
-#  --obfuscate --split-debug-info=HLQ_Struggle
+# Build using the tagged version (do not override VERSION/VERSIONCODE):
+# flutter build apk --release --target-platform=android-arm,android-arm64 --dart-define=ENVIRONMENT=RELEASE
 
 environment:
   # sdk: ">=2.10.0 <3.0.0"
@@ -27,6 +21,7 @@ dependencies:
     sdk: flutter
 
   async: ^2.13.1
+  crypto: ^3.0.7
   numberpicker: ^2.1.2
   
   #  amap_location_fluttify: ^0.22.0

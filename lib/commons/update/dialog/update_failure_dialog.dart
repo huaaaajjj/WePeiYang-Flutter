@@ -7,6 +7,7 @@ import 'package:we_pei_yang_flutter/commons/update/dialog/widgets/today_check.da
 import 'package:we_pei_yang_flutter/commons/update/dialog/widgets/update_detail.dart';
 import 'package:we_pei_yang_flutter/commons/update/dialog/widgets/update_title.dart';
 import 'package:we_pei_yang_flutter/commons/update/update_manager.dart';
+import 'package:we_pei_yang_flutter/commons/update/fork_update_service.dart';
 import 'package:we_pei_yang_flutter/commons/util/text_util.dart';
 import 'package:we_pei_yang_flutter/commons/widgets/dialog/dialog_button.dart';
 import 'package:we_pei_yang_flutter/commons/widgets/dialog/dialog_layout.dart';
@@ -35,15 +36,20 @@ class UpdateFailureDialog extends StatelessWidget {
     }
 
     void goToWeb() {
-      launchUrlString("https://mobile.twt.edu.cn/wpy/index.html",
-          mode: LaunchMode.externalNonBrowserApplication);
+      launchUrlString(
+          manager.isFork
+              ? ForkUpdateService.releasesUrl
+              : "https://mobile.twt.edu.cn/wpy/index.html",
+          mode: manager.isFork
+              ? LaunchMode.externalApplication
+              : LaunchMode.externalNonBrowserApplication);
     }
 
     Widget buttons;
 
     if (manager.version.isForced) {
       buttons = Column(
-        children: InstallManager.canGoToMarket
+        children: !manager.isFork && InstallManager.canGoToMarket
             ? [
                 WbyDialogStandardTwoButton(
                   first: goToWeb,
@@ -72,7 +78,7 @@ class UpdateFailureDialog extends StatelessWidget {
     } else {
       // 如果不是强制更新，那么就可以现在不更新
       buttons = Column(
-        children: InstallManager.canGoToMarket
+        children: !manager.isFork && InstallManager.canGoToMarket
             ? [
                 WbyDialogStandardTwoButton(
                   first: goToWeb,

@@ -5,9 +5,13 @@ class InstallManager {
   static const _channel = MethodChannel('com.twt.service/install');
   static bool canGoToMarket = false;
 
-  static void install(String apkName) {
-    var argument = {'path': apkName};
-    _channel.invokeMethod('install', argument);
+  static Future<void> install(String apkName,
+      {int? expectedVersionCode}) async {
+    final argument = <String, dynamic>{
+      'path': apkName,
+      if (expectedVersionCode != null) 'versionCode': expectedVersionCode,
+    };
+    await _channel.invokeMethod<void>('install', argument);
   }
 
   static Future<void> goToMarket() async {

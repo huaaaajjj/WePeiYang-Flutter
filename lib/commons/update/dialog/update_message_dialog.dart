@@ -27,7 +27,7 @@ class UpdateMessageDialog extends StatelessWidget {
     }
 
     void ok() {
-      if (Platform.isAndroid) {
+      if (manager.isFork || Platform.isAndroid) {
         // 弹出进度对话框
         UpdateDialog.progress.show();
         context.read<UpdateManager>().setDownload();

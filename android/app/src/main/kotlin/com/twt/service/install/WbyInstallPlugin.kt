@@ -1,13 +1,14 @@
 package com.twt.service.install
 
 
-import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.core.content.pm.PackageInfoCompat
 import com.twt.service.common.LogUtil
 import com.twt.service.common.WbyPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -24,7 +25,7 @@ class WbyInstallPlugin : WbyPlugin(), ActivityAware, PluginRegistry.ActivityResu
 
     private lateinit var activityBinding: ActivityPluginBinding
     private lateinit var resultFile: File
-    private lateinit var methodCall: MethodChannel.Result
+    private var methodCall: MethodChannel.Result? = null
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         LogUtil.d(TAG, "onMethodCall + ${call.method}")
@@ -33,8 +34,12 @@ class WbyInstallPlugin : WbyPlugin(), ActivityAware, PluginRegistry.ActivityResu
             when (call.method) {
                 "install" -> {
                     val path = call.argument<String>("path")!!
-                    methodCall = result
-                    installAPK(path)
+                    if (methodCall != null) {
+                        result.error("INSTALL_BUSY", "Installation already active", null)
+                    } else {
+                        methodCall = result
+                        installAPK(path, call.argument<Number>("versionCode")?.toLong())
+                    }
                 }
 
                 "goToMarket" -> goToMarket(result)
@@ -79,14 +84,32 @@ class WbyInstallPlugin : WbyPlugin(), ActivityAware, PluginRegistry.ActivityResu
         result.success(true)
     }
 
-    private fun installAPK(path: String) {
+    @Suppress("DEPRECATION")
+    private fun installAPK(path: String, expectedVersionCode: Long?) {
         try {
             resultFile = File(path)
-            println(resultFile.exists())
+            require(resultFile.isFile) { "APK file is missing" }
+            if (context.packageName == "com.twt.service.pad") {
+                val pm = context.packageManager
+                val archive = pm.getPackageArchiveInfo(path, PackageManager.GET_SIGNATURES)
+                    ?: error("Invalid APK")
+                val current = pm.getPackageInfo(context.packageName, PackageManager.GET_SIGNATURES)
+                require(archive.packageName == context.packageName) { "APK package mismatch" }
+                require(archive.signatures?.isNotEmpty() == true &&
+                    archive.signatures?.toSet() == current.signatures?.toSet()) {
+                    "APK signing certificate mismatch"
+                }
+                require(expectedVersionCode != null &&
+                    PackageInfoCompat.getLongVersionCode(archive) == expectedVersionCode) {
+                    "APK version does not match release metadata"
+                }
+                require(PackageInfoCompat.getLongVersionCode(archive) >
+                    PackageInfoCompat.getLongVersionCode(current)) { "APK is not a newer version" }
+            }
             activityBinding.addActivityResultListener(this)
             installApkWithSdkVersion()
         } catch (e: Exception) {
-            methodCall.error(INSTALL_APK_ERROR, "install apk error", e.message)
+            completeInstall(e.message ?: "Could not start APK installation")
         }
     }
 
@@ -126,7 +149,6 @@ class WbyInstallPlugin : WbyPlugin(), ActivityAware, PluginRegistry.ActivityResu
                     resultFile,
             )
             //添加这一句表示对目标应用临时授权该Uri所代表的文件
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             setDataAndType(apkUri, "application/vnd.android.package-archive")
         }
@@ -141,33 +163,48 @@ class WbyInstallPlugin : WbyPlugin(), ActivityAware, PluginRegistry.ActivityResu
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        activityBinding.removeActivityResultListener(this)
         LogUtil.d(TAG, "onDetachedFromActivityForConfigChanges")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        activityBinding = binding
+        if (methodCall != null) binding.addActivityResultListener(this)
         LogUtil.d(TAG, "onReattachedToActivityForConfigChanges")
     }
 
     override fun onDetachedFromActivity() {
+        completeInstall("Installation activity detached")
         LogUtil.d(TAG, "onDetachedFromActivity")
 
     }
 
+    private fun completeInstall(error: String? = null) {
+        val pending = methodCall ?: return
+        methodCall = null
+        activityBinding.removeActivityResultListener(this)
+        if (error == null) pending.success(null)
+        else pending.error(INSTALL_APK_ERROR, error, null)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        // 请求安装apk权限的回调
-        if (requestCode == REQUEST_PERMISSION) {
-            // 当过了请求权限的页面后就取消监听，不然会出问题
-            activityBinding.removeActivityResultListener(this)
-            if (resultCode == Activity.RESULT_OK) {
-                // 主要是因为安装apk的result很神奇~~~ 所以只好把listener去掉
-                activityBinding.activity.startActivityForResult(intentAfterN, INSTALL_APK)
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                Toast.makeText(context, "请允许安装第三方应用权限", Toast.LENGTH_LONG).show()
-                methodCall.error(NO_PERMISSION, "don't allow permission", "")
+        if (methodCall == null) return false
+        when (requestCode) {
+            REQUEST_PERMISSION -> {
+                // Settings may return RESULT_CANCELED even after permission was granted.
+                if (canRequestPackageInstalls) {
+                    runCatching {
+                        activityBinding.activity.startActivityForResult(intentAfterN, INSTALL_APK)
+                    }.onFailure { completeInstall(it.message ?: "Could not open installer") }
+                } else {
+                    Toast.makeText(context, "请允许安装第三方应用权限", Toast.LENGTH_LONG).show()
+                    completeInstall("Unknown-app installation permission denied")
+                }
             }
-            return true
+            INSTALL_APK -> completeInstall() // The system still owns the final user consent.
+            else -> return false
         }
-        return false
+        return true
     }
 
     companion object {
