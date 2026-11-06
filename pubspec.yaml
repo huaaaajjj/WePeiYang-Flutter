@@ -7,10 +7,10 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # 请保证
 # 'package:we_pei_yang_flutter/commons/environment/config.dart'
 # 中的 version 和 versionCode 保持一致
-version: 4.6.4+199
+version: 4.6.4+200
 
 # Build using the tagged version (do not override VERSION/VERSIONCODE):
-# flutter build apk --release --target-platform=android-arm,android-arm64 --dart-define=ENVIRONMENT=RELEASE
+# flutter build apk --release --target-platform=android-arm,android-arm64,android-x64 --dart-define=ENVIRONMENT=RELEASE
 
 environment:
   # sdk: ">=2.10.0 <3.0.0"

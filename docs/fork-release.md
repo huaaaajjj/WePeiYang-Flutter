@@ -4,10 +4,10 @@
 
 ## 版本与附件
 
-- 标签使用 `vX.Y.Z-pad.N`，例如 `v4.6.4-pad.3`。
+- 标签使用 `vX.Y.Z-pad.N`，例如 `v4.6.4-pad.4`。
 - `pubspec.yaml` 的版本为 `X.Y.Z+buildNumber`；build number 必须递增，并与 `EnvConfig.VERSIONCODE` 一致。
 - APK 必须按标签源码构建，不另用 `VERSION`、`VERSIONCODE`、`--build-name`、`--build-number` 覆盖版本。
-- 通用 ARM APK 命名为 `WePeiYang-For-Pad-<标签>-release.apk`。每个 Release 只上传一个同名 APK，须为 uploaded 状态且有 GitHub 提供的 SHA-256 digest。
+- 通用 APK 包含 ARMv7 / ARM64 / x86_64 的 Flutter 引擎和 AOT 库，命名为 `WePeiYang-For-Pad-<标签>-release.apk`。每个 Release 只上传一个同名 APK，须为 uploaded 状态且有 GitHub 提供的 SHA-256 digest。
 - Release 必须非 draft、非 prerelease，发布完成后设为 Latest。
 - 独立包名保持 `com.twt.service.pad`；后续覆盖升级必须保留同一签名。当前仍沿用测试签名，不代表官方发行签名。
 
@@ -21,15 +21,17 @@
 flutter pub get
 flutter test --no-pub
 flutter analyze --no-pub
-flutter build apk --release --target-platform=android-arm,android-arm64 --dart-define=ENVIRONMENT=RELEASE
+flutter build apk --release --target-platform=android-arm,android-arm64,android-x64 --dart-define=ENVIRONMENT=RELEASE
 ```
 
 产物为 `build/app/outputs/flutter-apk/app-release.apk`。按上述约定改名，核对 APK 版本、签名、SHA-256，再上传 APK 与校验文件。现有 27 warning、2 info 会让 analyze 返回非零状态；不能据此忽略新增诊断。
 
 Windows 项目和 Pub 缓存跨磁盘时，若遇 Kotlin `different roots` / `Storage ... already registered`，可仅为当前构建设置 `GRADLE_OPTS=-Dorg.gradle.project.kotlin.incremental=false -Dorg.gradle.project.kotlin.compiler.execution.strategy=in-process`，不要为此删除签名或全局缓存。
 
+内存紧张时，可在当前命令设置 `JAVA_OPTS='-Xms32m -Xmx256m'`，并向上述 `GRADLE_OPTS` 加入 `-Dorg.gradle.jvmargs="-Xms128m -Xmx2048m" -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false`。C 盘不足时可把该命令的 `TEMP` / `TMP` 指向 D 盘临时目录；这些调整不应修改全局配置或删除虚拟机。
+
 ## 用户升级
 
-旧 `pad.2` 没有自动检查能力，需要手动下载安装 `pad.3` 一次；之后启动应用发现更高版本的正式 Release 会提示更新。下载安装仍需用户确认，未知来源安装权限由 Android 管理，不静默安装。单纯推送代码不会触发应用更新。
+旧 `pad.2` 没有自动检查能力，需要手动安装 `pad.3` 或更高版本一次；之后启动应用发现更高版本的正式 Release 会提示更新。下载安装仍需用户确认，未知来源安装权限由 Android 管理，不静默安装。单纯推送代码不会触发应用更新。
 
 网络超时或 GitHub 限流时，自动检查不打扰用户，手动检查显示失败；下载或校验失败可重试，网页兜底仅指向本 fork。原包及 `.develop` 不改变其原有更新源。
