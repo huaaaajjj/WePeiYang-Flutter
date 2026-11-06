@@ -54,6 +54,14 @@ import 'schedule/schedule_providers.dart';
 /// 应用入口
 final _entry = WePeiYangApp();
 
+Future<void> configureAppOrientation() async {
+  final display = WidgetsBinding.instance.platformDispatcher.views.first.display;
+  final size = display.size / display.devicePixelRatio;
+  // 启动窗口可能尚未有尺寸，分屏窗口也不代表设备屏幕大小。
+  await SystemChrome.setPreferredOrientations(
+      size.shortestSide < 600 ? [DeviceOrientation.portraitUp] : []);
+}
+
 void main() async {
   runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -61,12 +69,7 @@ void main() async {
     /// 屏幕方向：手机锁竖屏（维持原有体验）；平板/大屏交由系统决定，
     /// 以便横屏使用（AndroidManifest 已移除 portrait 锁定）
     if (Platform.isAndroid) {
-      final _view = WidgetsBinding.instance.platformDispatcher.views.first;
-      final _size = _view.physicalSize / _view.devicePixelRatio;
-      if (_size.shortestSide < 600) {
-        await SystemChrome.setPreferredOrientations(
-            [DeviceOrientation.portraitUp]);
-      }
+      await configureAppOrientation();
     }
 
     /// 初始化环境变量
