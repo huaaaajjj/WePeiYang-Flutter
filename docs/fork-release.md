@@ -4,7 +4,7 @@
 
 ## 版本与附件
 
-- 标签使用 `vX.Y.Z-pad.N`，例如 `v4.6.4-pad.4`。
+- 标签使用 `vX.Y.Z-pad.N`，例如 `v4.6.4-pad.5`。
 - `pubspec.yaml` 的版本为 `X.Y.Z+buildNumber`；build number 必须递增，并与 `EnvConfig.VERSIONCODE` 一致。
 - APK 必须按标签源码构建，不另用 `VERSION`、`VERSIONCODE`、`--build-name`、`--build-number` 覆盖版本。
 - 通用 APK 包含 ARMv7 / ARM64 / x86_64 的 Flutter 引擎和 AOT 库，命名为 `WePeiYang-For-Pad-<标签>-release.apk`。每个 Release 只上传一个同名 APK，须为 uploaded 状态且有 GitHub 提供的 SHA-256 digest。
