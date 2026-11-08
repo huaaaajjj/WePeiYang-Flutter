@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -177,11 +178,19 @@ void main() {
   testWidgets('startup prompts once, fits long notes and supports skipping',
       (tester) async {
     final manager = UpdateManager();
-    adapter.release['body'] = List.filled(100, '平板适配更新说明').join('\n');
+    adapter.release['body'] = [
+      '## 平板适配更新',
+      '',
+      '- **修复** 更新提示',
+      '',
+      ...List.filled(100, '平板适配更新说明'),
+    ].join('\n');
     await pumpUpdater(tester, manager);
     await runIo(tester, () => manager.checkUpdate());
     await tester.pumpAndSettle();
     expect(find.byType(UpdateMessageDialog), findsOneWidget);
+    expect(find.byType(MarkdownBody), findsOneWidget);
+    expect(find.textContaining('##', findRichText: true), findsNothing);
     expect(tester.takeException(), isNull);
     tester.view.physicalSize = const Size(1280, 800);
     await tester.pumpAndSettle();
